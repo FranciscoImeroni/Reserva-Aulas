@@ -5,6 +5,10 @@ import { UsersModule } from './modules/user/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { MailModule } from './modules/mail/mail.module';
 import { User } from './modules/user/entity/user.entity';
+import { AulasModule } from './modules/aula/aula.module';
+import { AulaVariable } from './modules/aula/entities/aula-variable.entity';
+import { Aula } from './modules/aula/entities/aula.entity';
+import { Variable } from './modules/aula/entities/variable.entity';
 // Importa tus otros módulos
 
 @Module({
@@ -21,7 +25,7 @@ import { User } from './modules/user/entity/user.entity';
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
-        entities: [User],
+        entities: [User, AulaVariable, Aula, Variable],
         autoLoadEntities: true,
         synchronize: true,
       }),
@@ -29,6 +33,7 @@ import { User } from './modules/user/entity/user.entity';
     UsersModule,
     AuthModule,
     MailModule,
+    AulasModule
     // Agrega otros módulos
   ],
 })
