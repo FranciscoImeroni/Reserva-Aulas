@@ -24,12 +24,10 @@ let UsersController = class UsersController {
     create(createUserDto) {
         return this.usersService.createUser(createUserDto);
     }
-    /*   @Get()
-      findAll() {
+    findAll() {
         return this.usersService.findAll();
-      }
-    
-      @Get(':id')
+    }
+    /*   @Get(':id')
       findOne(@Param('id') id: number) {
         return this.usersService.findOne(id);
       }
@@ -50,6 +48,12 @@ __decorate([
     __metadata("design:paramtypes", [create_user_dto_1.CreateUserDto]),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "create", null);
+__decorate([
+    (0, common_1.Get)(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], UsersController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id')),
