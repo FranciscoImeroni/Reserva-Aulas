@@ -18,6 +18,8 @@ const aula_module_1 = require("./modules/aula/aula.module");
 const aula_variable_entity_1 = require("./modules/aula/entities/aula-variable.entity");
 const aula_entity_1 = require("./modules/aula/entities/aula.entity");
 const variable_entity_1 = require("./modules/aula/entities/variable.entity");
+const booking_module_1 = require("./modules/booking/booking.module");
+const booking_entity_1 = require("./modules/booking/entity/booking.entity");
 // Importa tus otros módulos
 let AppModule = class AppModule {
 };
@@ -37,7 +39,7 @@ exports.AppModule = AppModule = __decorate([
                     username: configService.get('DB_USERNAME'),
                     password: configService.get('DB_PASSWORD'),
                     database: configService.get('DB_NAME'),
-                    entities: [user_entity_1.User, aula_variable_entity_1.AulaVariable, aula_entity_1.Aula, variable_entity_1.Variable],
+                    entities: [user_entity_1.User, aula_variable_entity_1.AulaVariable, aula_entity_1.Aula, variable_entity_1.Variable, booking_entity_1.Booking],
                     autoLoadEntities: true,
                     synchronize: true,
                 }),
@@ -45,7 +47,8 @@ exports.AppModule = AppModule = __decorate([
             users_module_1.UsersModule,
             auth_module_1.AuthModule,
             mail_module_1.MailModule,
-            aula_module_1.AulasModule
+            aula_module_1.AulasModule,
+            booking_module_1.BookingModule
             // Agrega otros módulos
         ],
     })

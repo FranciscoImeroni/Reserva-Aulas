@@ -12,11 +12,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 // user.entity.ts
 const typeorm_1 = require("typeorm");
+const booking_entity_1 = require("../../booking/entity/booking.entity");
 let User = class User {
 };
 exports.User = User;
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)(),
+    (0, typeorm_1.PrimaryGeneratedColumn)('uuid') // UUID format for unique user IDs
+    ,
     __metadata("design:type", String)
 ], User.prototype, "id", void 0);
 __decorate([
@@ -32,14 +34,17 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "password", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', nullable: true }) // Opción nullable en TypeORM
-    ,
+    (0, typeorm_1.Column)({ type: 'varchar', nullable: true }),
     __metadata("design:type", Object)
 ], User.prototype, "verificationToken", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: false }),
     __metadata("design:type", Boolean)
 ], User.prototype, "isVerified", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => booking_entity_1.Booking, (booking) => booking.user, { cascade: true }),
+    __metadata("design:type", Array)
+], User.prototype, "bookings", void 0);
 exports.User = User = __decorate([
-    (0, typeorm_1.Entity)()
+    (0, typeorm_1.Entity)({ name: 'users' })
 ], User);

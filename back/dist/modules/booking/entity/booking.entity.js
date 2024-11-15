@@ -9,30 +9,38 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Aula = void 0;
-// aula.entity.ts
+exports.Booking = void 0;
+// entity/booking.entity.ts
 const typeorm_1 = require("typeorm");
-const aula_variable_entity_1 = require("../entities/aula-variable.entity");
-const booking_entity_1 = require("../../booking/entity/booking.entity");
-let Aula = class Aula {
+const aula_entity_1 = require("../../aula/entities/aula.entity");
+const user_entity_1 = require("../../user/entity/user.entity");
+let Booking = class Booking {
 };
-exports.Aula = Aula;
+exports.Booking = Booking;
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
-], Aula.prototype, "id", void 0);
+], Booking.prototype, "id", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", Date)
+], Booking.prototype, "start", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", Date)
+], Booking.prototype, "end", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
-], Aula.prototype, "nombre", void 0);
+], Booking.prototype, "description", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => aula_variable_entity_1.AulaVariable, (aulaVariable) => aulaVariable.aula, { cascade: true }),
-    __metadata("design:type", Array)
-], Aula.prototype, "variables", void 0);
+    (0, typeorm_1.ManyToOne)(() => aula_entity_1.Aula, (aula) => aula.bookings),
+    __metadata("design:type", aula_entity_1.Aula)
+], Booking.prototype, "aula", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => booking_entity_1.Booking, (booking) => booking.aula, { cascade: true }),
-    __metadata("design:type", Array)
-], Aula.prototype, "bookings", void 0);
-exports.Aula = Aula = __decorate([
-    (0, typeorm_1.Entity)({ name: 'aulas' })
-], Aula);
+    (0, typeorm_1.ManyToOne)(() => user_entity_1.User, (user) => user.bookings),
+    __metadata("design:type", user_entity_1.User)
+], Booking.prototype, "user", void 0);
+exports.Booking = Booking = __decorate([
+    (0, typeorm_1.Entity)()
+], Booking);

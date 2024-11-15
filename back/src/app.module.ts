@@ -9,6 +9,8 @@ import { AulasModule } from './modules/aula/aula.module';
 import { AulaVariable } from './modules/aula/entities/aula-variable.entity';
 import { Aula } from './modules/aula/entities/aula.entity';
 import { Variable } from './modules/aula/entities/variable.entity';
+import { BookingModule } from './modules/booking/booking.module';
+import { Booking } from './modules/booking/entity/booking.entity';
 // Importa tus otros módulos
 
 @Module({
@@ -25,7 +27,7 @@ import { Variable } from './modules/aula/entities/variable.entity';
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
-        entities: [User, AulaVariable, Aula, Variable],
+        entities: [User, AulaVariable, Aula, Variable, Booking],
         autoLoadEntities: true,
         synchronize: true,
       }),
@@ -33,7 +35,8 @@ import { Variable } from './modules/aula/entities/variable.entity';
     UsersModule,
     AuthModule,
     MailModule,
-    AulasModule
+    AulasModule,
+    BookingModule
     // Agrega otros módulos
   ],
 })
