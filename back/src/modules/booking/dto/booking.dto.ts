@@ -16,9 +16,9 @@ export class CreateBookingDto {
 
   @IsNotEmpty()
   @IsNumber()
-  aulaId: number; // Changed to number
+  aulaId: string; 
 
   @IsNotEmpty()
   @IsString()
-  userId: string; // Changed to number
+  userId: string; 
 }

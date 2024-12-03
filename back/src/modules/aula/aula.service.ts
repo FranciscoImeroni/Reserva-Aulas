@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Aula } from './entities/aula.entity';
@@ -14,14 +14,19 @@ export class AulasService {
   ) {}
 
   // CRUD para Aula
-  async createAula(nombre: string): Promise<Aula> {
-    const aula = this.aulaRepository.create({ nombre });
+  async createAula(name: string): Promise<Aula> {
+    const aula = this.aulaRepository.create({ name });
     return await this.aulaRepository.save(aula);
   }
 
-  async getAulas(): Promise<Aula[]> {
+/*   async getAulas(): Promise<Aula[]> {
     return await this.aulaRepository.find({ relations: ['variables'] });
+  } */
+
+  async findAll(): Promise<Aula[]> {
+    return this.aulaRepository.find(); // Devuelve todas las aulas
   }
+  
 
   // CRUD para Variable
   async createVariable(nombre: string, esOpcional: boolean): Promise<Variable> {
@@ -30,7 +35,7 @@ export class AulasService {
   }
 
   // Asignar una variable a un aula
-  async assignVariableToAula(aulaId: number, variableId: number, valor: string): Promise<AulaVariable> {
+  async assignVariableToAula(aulaId: string, variableId: number, valor: string): Promise<AulaVariable> {
     // Buscar el aula y la variable
     const aula = await this.aulaRepository.findOne({ where: { id: aulaId } });
     const variable = await this.variableRepository.findOne({ where: { id: variableId } });
@@ -54,4 +59,13 @@ export class AulasService {
     // Guardar la nueva entidad aulaVariable
     return await this.aulaVariableRepository.save(aulaVariable);
   }
+
+  async findAulaById(aulaId: string): Promise<Aula> {
+    const aula = await this.aulaRepository.findOneBy({ id: aulaId });
+    if (!aula) {
+      throw new NotFoundException(`Aula with ID ${aulaId} not found`);
+    }
+    return aula;
+  }
+  
 }

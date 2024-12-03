@@ -18,12 +18,12 @@ export class BookingController {
   }
 
   @Get(':id')
-  async getBookingById(@Param('id') id: number) {
+  async getBookingById(@Param('id') id: string) {
     return this.bookingService.getBookingById(id);
   }
 
   @Put(':id')
-  async updateBooking(@Param('id') id: number, @Body() createBookingDto: CreateBookingDto) {
+  async updateBooking(@Param('id') id: string, @Body() createBookingDto: CreateBookingDto) {
     return this.bookingService.updateBooking(id, createBookingDto);
   }
 

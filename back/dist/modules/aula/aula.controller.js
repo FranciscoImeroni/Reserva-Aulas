@@ -28,15 +28,17 @@ let AulasController = class AulasController {
     constructor(aulasService) {
         this.aulasService = aulasService;
     }
-    createAula(nombre) {
+    createAula(name) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.aulasService.createAula(nombre);
+            return yield this.aulasService.createAula(name);
         });
     }
-    getAulas() {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield this.aulasService.getAulas();
-        });
+    /*   @Get()
+      async getAulas() {
+        return await this.aulasService.getAulas();
+      } */
+    findAll() {
+        return this.aulasService.findAll();
     }
     assignVariableToAula(aulaId, variableId, valor) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -57,14 +59,14 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
-], AulasController.prototype, "getAulas", null);
+], AulasController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Post)(':aulaId/variable'),
     __param(0, (0, common_1.Param)('aulaId')),
     __param(1, (0, common_1.Body)('variableId')),
     __param(2, (0, common_1.Body)('valor')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Number, String]),
+    __metadata("design:paramtypes", [String, Number, String]),
     __metadata("design:returntype", Promise)
 ], AulasController.prototype, "assignVariableToAula", null);
 exports.AulasController = AulasController = __decorate([

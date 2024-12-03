@@ -19,38 +19,36 @@ export class BookingService {
   ) {}
 
   async createBooking(dto: CreateBookingDto): Promise<Booking> {
-    // Fetch Aula by ID
-    const aula = await this.aulaRepository.findOneBy({ id: dto.aulaId });
-    if (!aula) throw new NotFoundException(`Aula with ID ${dto.aulaId} not found`);
-
-    // Fetch User by ID
-    const user = await this.userRepository.findOneBy({ id: dto.userId });
-    if (!user) throw new NotFoundException(`User with ID ${dto.userId} not found`);
-
-    // Create and save Booking
+    const aulaId = String(dto.aulaId); // Convertir a string
+    const userId = String(dto.userId); // Convertir a string
+  
+    const aula = await this.aulaRepository.findOne({ where: { id: aulaId } });
+    if (!aula) throw new NotFoundException(`Aula with ID ${aulaId} not found`);
+  
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
+  
     const booking = this.bookingRepository.create({
-      start: dto.start,
-      end: dto.end,
-      description: dto.description,
-      aula, // Aula instance here
-      user, // User instance here
+      ...dto,
+      aula,
+      user,
     });
-
-    return await this.bookingRepository.save(booking);
+    return this.bookingRepository.save(booking);
   }
+  
 
   async getAllBookings(): Promise<Booking[]> {
     return await this.bookingRepository.find({ relations: ['aula', 'user'] });
   }
 
-  async getBookingById(id: number): Promise<Booking> {
+  async getBookingById(id: string): Promise<Booking> {
     const booking = await this.bookingRepository.findOne({ where: { id }, relations: ['aula', 'user'] });
     if (!booking) throw new NotFoundException(`Booking with ID ${id} not found`);
     return booking;
   }
 
 // booking.service.ts
-async updateBooking(id: number, dto: CreateBookingDto): Promise<Booking> {
+async updateBooking(id: string, dto: CreateBookingDto): Promise<Booking> {
   const booking = await this.getBookingById(id);
 
   // Fetch Aula and User instances

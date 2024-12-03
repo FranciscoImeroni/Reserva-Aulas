@@ -5,11 +5,14 @@ import { Booking } from '../../booking/entity/booking.entity';
 
 @Entity({ name: 'aulas' })
 export class Aula {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
-  nombre: string;
+  name: string;
+
+  @Column()
+  capacity: number;
 
   @OneToMany(() => AulaVariable, (aulaVariable) => aulaVariable.aula, { cascade: true })
   variables: AulaVariable[];

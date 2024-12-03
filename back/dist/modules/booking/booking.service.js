@@ -37,23 +37,17 @@ let BookingService = class BookingService {
     }
     createBooking(dto) {
         return __awaiter(this, void 0, void 0, function* () {
-            // Fetch Aula by ID
-            const aula = yield this.aulaRepository.findOneBy({ id: dto.aulaId });
+            const aulaId = String(dto.aulaId); // Convertir a string
+            const userId = String(dto.userId); // Convertir a string
+            const aula = yield this.aulaRepository.findOne({ where: { id: aulaId } });
             if (!aula)
-                throw new common_1.NotFoundException(`Aula with ID ${dto.aulaId} not found`);
-            // Fetch User by ID
-            const user = yield this.userRepository.findOneBy({ id: dto.userId });
+                throw new common_1.NotFoundException(`Aula with ID ${aulaId} not found`);
+            const user = yield this.userRepository.findOne({ where: { id: userId } });
             if (!user)
-                throw new common_1.NotFoundException(`User with ID ${dto.userId} not found`);
-            // Create and save Booking
-            const booking = this.bookingRepository.create({
-                start: dto.start,
-                end: dto.end,
-                description: dto.description,
-                aula, // Aula instance here
-                user, // User instance here
-            });
-            return yield this.bookingRepository.save(booking);
+                throw new common_1.NotFoundException(`User with ID ${userId} not found`);
+            const booking = this.bookingRepository.create(Object.assign(Object.assign({}, dto), { aula,
+                user }));
+            return this.bookingRepository.save(booking);
         });
     }
     getAllBookings() {

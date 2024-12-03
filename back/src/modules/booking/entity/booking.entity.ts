@@ -5,8 +5,8 @@ import { User } from '../../user/entity/user.entity';
 
 @Entity()
 export class Booking {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   start: Date;

@@ -35,15 +35,18 @@ let AulasService = class AulasService {
         this.aulaVariableRepository = aulaVariableRepository;
     }
     // CRUD para Aula
-    createAula(nombre) {
+    createAula(name) {
         return __awaiter(this, void 0, void 0, function* () {
-            const aula = this.aulaRepository.create({ nombre });
+            const aula = this.aulaRepository.create({ name });
             return yield this.aulaRepository.save(aula);
         });
     }
-    getAulas() {
+    /*   async getAulas(): Promise<Aula[]> {
+        return await this.aulaRepository.find({ relations: ['variables'] });
+      } */
+    findAll() {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.aulaRepository.find({ relations: ['variables'] });
+            return this.aulaRepository.find(); // Devuelve todas las aulas
         });
     }
     // CRUD para Variable
@@ -74,6 +77,15 @@ let AulasService = class AulasService {
             });
             // Guardar la nueva entidad aulaVariable
             return yield this.aulaVariableRepository.save(aulaVariable);
+        });
+    }
+    findAulaById(aulaId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const aula = yield this.aulaRepository.findOneBy({ id: aulaId });
+            if (!aula) {
+                throw new common_1.NotFoundException(`Aula with ID ${aulaId} not found`);
+            }
+            return aula;
         });
     }
 };
