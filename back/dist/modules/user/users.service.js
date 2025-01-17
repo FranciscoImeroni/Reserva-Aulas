@@ -49,24 +49,75 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const user_entity_1 = require("./entity/user.entity");
-const bcrypt = __importStar(require("bcrypt")); // Import bcrypt for password hashing
+const bcrypt = __importStar(require("bcrypt"));
+const jwt_1 = require("@nestjs/jwt");
 let UsersService = class UsersService {
-    constructor(userRepository) {
+    constructor(userRepository, jwtService) {
         this.userRepository = userRepository;
+        this.jwtService = jwtService;
     }
     validateUser(email, password) {
         return __awaiter(this, void 0, void 0, function* () {
             const user = yield this.findByEmail(email);
-            if (user && (yield bcrypt.compare(password, user.password))) {
-                return user; // Return user if password matches
+            if (!user) {
+                return null;
             }
-            return null; // Return null if user not found or password does not match
+            const isPasswordValid = yield bcrypt.compare(password, user.password);
+            if (!isPasswordValid) {
+                return null;
+            }
+            return user;
         });
     }
     createUser(createUserDto) {
         return __awaiter(this, void 0, void 0, function* () {
-            const user = this.userRepository.create(createUserDto);
+            if (!createUserDto.password) {
+                throw new Error('Password is required');
+            }
+            const hashedPassword = yield bcrypt.hash(createUserDto.password, 10);
+            const user = this.userRepository.create(Object.assign(Object.assign({}, createUserDto), { role: 'Unverified', password: hashedPassword }));
             return yield this.userRepository.save(user);
+        });
+    }
+    /*
+      async updateRole(id: string, updateRoleDto: UpdateRoleDto): Promise<User> {
+        const user = await this.userRepository.findOne({ where: { id } });
+        if (!user) {
+          throw new Error('User not found');
+        }
+    
+        // Actualizamos el rol del usuario
+        user.role = updateRoleDto.role; // Suponiendo que roles es un array de strings
+        await this.userRepository.save(user);
+    
+        return user;
+      } */
+    updateRoleAndGenerateToken(userId, updateRoleDto) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // Buscar el usuario
+            const user = yield this.userRepository.findOne({ where: { id: userId } });
+            if (!user) {
+                throw new Error('User not found');
+            }
+            // Actualizar el rol del usuario
+            user.role = updateRoleDto.role;
+            yield this.userRepository.save(user);
+            // Generar un nuevo token JWT con el rol actualizado
+            const payload = { sub: user.id, roles: user.role };
+            const newToken = this.jwtService.sign(payload);
+            return { newToken, user };
+        });
+    }
+    updatePasswords() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const users = yield this.findAll();
+            for (let user of users) {
+                if (!user.password.startsWith('$2b$')) {
+                    const hashedPassword = yield bcrypt.hash(user.password, 10);
+                    user.password = hashedPassword;
+                    yield this.update(user.id, { password: hashedPassword });
+                }
+            }
         });
     }
     findAll() {
@@ -99,7 +150,7 @@ let UsersService = class UsersService {
     }
     findByEmail(email) {
         return __awaiter(this, void 0, void 0, function* () {
-            return (yield this.userRepository.findOne({ where: { email } })) || undefined;
+            return this.userRepository.findOne({ where: { email } });
         });
     }
     findById(id) {
@@ -107,21 +158,36 @@ let UsersService = class UsersService {
             return (yield this.userRepository.findOne({ where: { id } })) || undefined;
         });
     }
-    activateUser(userId) {
+    /*   async findByVerificationToken(token: string): Promise<User> {
+        const user = await this.userRepository.findOne({ where: { verificationToken: token } });
+        if (!user) {
+          throw new NotFoundException('Token de verificación inválido o expirado');
+        }
+        return user;
+      } */
+    findByVerificationToken(verificationToken) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.userRepository.update(userId, { isVerified: true });
+            const user = yield this.userRepository.findOne({ where: { verificationToken } });
+            if (!user) {
+                throw new common_1.NotFoundException('User with verification token not found');
+            }
+            return user;
         });
     }
-    verifyUser(token) {
+    save(user) {
         return __awaiter(this, void 0, void 0, function* () {
-            const user = yield this.userRepository.findOne({ where: { verificationToken: token } });
-            if (user) {
-                user.isVerified = true;
-                user.verificationToken = null; // Elimina el token una vez verificado
-                yield this.userRepository.save(user);
-                return user;
+            return this.userRepository.save(user);
+        });
+    }
+    updateUserRole(userId, newRole) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const user = yield this.userRepository.findOne({ where: { id: userId } });
+            if (!user) {
+                throw new common_1.NotFoundException('Usuario no encontrado');
             }
-            return undefined;
+            user.role = newRole;
+            user.verificationToken = null;
+            yield this.userRepository.save(user);
         });
     }
 };
@@ -129,5 +195,6 @@ exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        jwt_1.JwtService])
 ], UsersService);

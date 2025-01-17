@@ -1,26 +1,72 @@
-import { Controller, Post, Get, Body, Param } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
 import { AulasService } from './aula.service';
+import { Aula } from './entities/aula.entity';
+import { CreateAulaDto } from './dto/CreateAulaDto.dto';
+import { Variable } from './entities/variable.entity';
 
 @Controller('aulas')
 export class AulasController {
   constructor(private readonly aulasService: AulasService) {}
 
   @Post()
-  async createAula(@Body('nombre') nombre: string) {
-    return await this.aulasService.createAula(nombre);
-  }
+  async create(@Body() createAulaDto: CreateAulaDto): Promise<Aula> {
+    return this.aulasService.create(createAulaDto);
+  }  
 
-  @Get()
+/*   @Get()
   async getAulas() {
     return await this.aulasService.getAulas();
-  }
+  } */
 
-  @Post(':aulaId/variable')
+    @Get()
+    async getAllAulas(): Promise<Aula[]> {
+      return this.aulasService.findAll();
+    }
+
+    @Get('Variables')
+    async getAllVariables() {
+      return this.aulasService.findAllVariables();
+    }
+
+  @Post(':aulaId/assignVariable')
   async assignVariableToAula(
-    @Param('aulaId') aulaId: number,
-    @Body('variableId') variableId: number,
+    @Param('aulaId') aulaId: string,
+    @Body('variableId') variableId: string,
     @Body('valor') valor: string,
   ) {
     return await this.aulasService.assignVariableToAula(aulaId, variableId, valor);
   }
+
+  @Post('createVariable')
+  async createVariable(
+    @Body('name') name: string,
+  ): Promise<Variable> {
+    return this.aulasService.createVariable(name);
+  }
+
+  @Get(':aulaId/variables')
+  async getVariablesByAulaId(@Param('aulaId') aulaId: string)/* : Promise<Variable[]> */ {
+    console.log('Valor de aulaId:', aulaId); // Asegúrate de que se imprime correctamente
+    if (!aulaId) {
+      throw new BadRequestException('El ID del aula es requerido');
+    }
+    return await this.aulasService.getVariablesByAulaId(aulaId);
+  }
+  
+  @Get(':aulaId')
+  getAulaById(@Param('aulaId') aulaId: string) {
+    return this.aulasService.findAulaById(aulaId);
+  }
+
+  @Post('names') 
+  async getVariableNames(@Body('ids') ids: string): Promise<{ names: string[] }> {
+    if (!ids || !Array.isArray(ids) || ids.length === 0) { 
+      throw new HttpException('Invalid or missing IDs array', HttpStatus.BAD_REQUEST);
+    }
+
+    const names = await this.aulasService.getVariableNamesByIds(ids);
+    return { names };
+  }
+
+  
 }

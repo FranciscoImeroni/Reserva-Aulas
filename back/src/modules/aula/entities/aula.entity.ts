@@ -1,19 +1,28 @@
 // aula.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { AulaVariable } from '../entities/aula-variable.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToMany, JoinTable } from 'typeorm';
 import { Booking } from '../../booking/entity/booking.entity';
+import { Variable } from './variable.entity';
+import { AulaVariable } from './aula-variable.entity';
 
 @Entity({ name: 'aulas' })
 export class Aula {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
-  nombre: string;
+  name: string;
 
-  @OneToMany(() => AulaVariable, (aulaVariable) => aulaVariable.aula, { cascade: true })
-  variables: AulaVariable[];
+  @Column()
+  capacity: number;
 
-  @OneToMany(() => Booking, (booking) => booking.aula, { cascade: true })
+  @OneToMany(() => AulaVariable, (aulaVariable) => aulaVariable.aula, { eager: true })
+  aulaVariables: AulaVariable[];
+
+  @ManyToMany(() => Variable)
+  @JoinTable()
+  variables: Variable[];
+
+  @OneToMany(() => Booking, (booking) => booking.aula)
   bookings: Booking[];
+  
 }

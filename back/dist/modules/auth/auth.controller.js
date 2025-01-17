@@ -25,6 +25,10 @@ exports.AuthController = void 0;
 const common_1 = require("@nestjs/common");
 const auth_service_1 = require("./auth.service");
 const create_user_dto_1 = require("../user/dto/create-user.dto");
+const user_entity_1 = require("../user/entity/user.entity");
+const current_user_decorator_1 = require("./current-user.decorator");
+const roles_decorators_1 = require("../../Decorators/roles.decorators");
+const roles_enum_1 = require("../user/dto/roles.enum");
 let AuthController = class AuthController {
     constructor(authService) {
         this.authService = authService;
@@ -41,15 +45,14 @@ let AuthController = class AuthController {
             yield this.authService.login(email, password, res);
         });
     }
+    getMe(user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return user;
+        });
+    }
     logout(res) {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.authService.logout(res);
-        });
-    }
-    verifyEmail(userId, res) {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield this.authService.verifyEmail(userId);
-            res.status(common_1.HttpStatus.OK).json({ message: 'Email verified successfully' });
         });
     }
     getProfile(req) {
@@ -57,13 +60,18 @@ let AuthController = class AuthController {
             return yield this.authService.getAuthenticatedUser(req);
         });
     }
-    verifyAccount(token) {
+    verifyEmail(token, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            const user = yield this.authService.verifyUser(token); // Llama a verifyUser de AuthService
-            if (!user) {
-                throw new common_1.HttpException('Invalid token', common_1.HttpStatus.BAD_REQUEST);
+            try {
+                const user = yield this.authService.verifyEmail(token);
+                res.status(common_1.HttpStatus.OK).json({
+                    message: 'Cuenta verificada con éxito. Ahora puedes iniciar sesión.',
+                    user,
+                });
             }
-            return { message: 'Account verified successfully' };
+            catch (error) {
+                res.status(common_1.HttpStatus.BAD_REQUEST).json({});
+            }
         });
     }
 };
@@ -86,20 +94,20 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
 __decorate([
+    (0, common_1.Get)('me'),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_entity_1.User]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "getMe", null);
+__decorate([
     (0, common_1.Post)('logout'),
+    (0, roles_decorators_1.Roles)(roles_enum_1.Role.Admin, roles_enum_1.Role.User),
     __param(0, (0, common_1.Res)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "logout", null);
-__decorate([
-    (0, common_1.Get)('verify-email/:userId'),
-    __param(0, (0, common_1.Param)('userId')),
-    __param(1, (0, common_1.Res)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", Promise)
-], AuthController.prototype, "verifyEmail", null);
 __decorate([
     (0, common_1.Get)('profile'),
     __param(0, (0, common_1.Req)()),
@@ -110,10 +118,11 @@ __decorate([
 __decorate([
     (0, common_1.Get)('verify'),
     __param(0, (0, common_1.Query)('token')),
+    __param(1, (0, common_1.Res)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
-], AuthController.prototype, "verifyAccount", null);
+], AuthController.prototype, "verifyEmail", null);
 exports.AuthController = AuthController = __decorate([
     (0, common_1.Controller)('auth'),
     __metadata("design:paramtypes", [auth_service_1.AuthService])

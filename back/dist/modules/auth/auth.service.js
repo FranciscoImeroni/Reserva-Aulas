@@ -48,6 +48,8 @@ const users_service_1 = require("../user/users.service");
 const common_2 = require("@nestjs/common");
 const mail_service_1 = require("../mail/mail.service");
 const crypto = __importStar(require("crypto"));
+const dotenv = __importStar(require("dotenv"));
+dotenv.config();
 let AuthService = class AuthService {
     constructor(usersService, jwtService, mailService) {
         this.usersService = usersService;
@@ -63,33 +65,92 @@ let AuthService = class AuthService {
             }
             // Genera un token de verificación
             const verificationToken = crypto.randomBytes(32).toString('hex');
-            // Crea el usuario con el token de verificación
-            const user = yield this.usersService.createUser(Object.assign(Object.assign({}, createUserDto), { verificationToken }));
-            // Envía el correo de verificación
-            const verificationLink = `http://your-app-url.com/verify?token=${verificationToken}`;
+            // Crea el usuario con el rol "Unverified" y el token de verificación
+            const user = yield this.usersService.createUser(Object.assign(Object.assign({}, createUserDto), { role: 'Unverified', // Asigna el rol por defecto "Unverified"
+                verificationToken }));
+            // Envía el correo de verificación con el enlace
+            const DOMAIN_BACK = process.env.DOMAIN_BACK;
+            const verificationLink = `${DOMAIN_BACK}/auth/verify?token=${verificationToken}`;
             yield this.mailService.sendMail(createUserDto.email, 'Verifica tu cuenta', 'Por favor, verifica tu cuenta usando el siguiente enlace.', `<p>Bienvenido! Verifica tu cuenta con el siguiente enlace: <a href="${verificationLink}">Verificar cuenta</a></p>`);
             return user;
         });
     }
-    // Inicio de sesión del usuario y configuración de la cookie con JWT
     login(email, password, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            const user = yield this.usersService.validateUser(email, password); // Asume que hay un método para validar usuario
+            // Validación del usuario
+            const user = yield this.usersService.validateUser(email, password);
             if (!user) {
                 throw new common_1.UnauthorizedException('Invalid email or password');
             }
-            // Generar token JWT
-            const payload = { sub: user.id };
-            const token = this.jwtService.sign(payload, { expiresIn: '7d' });
-            // Configurar cookie HttpOnly
+            if (user.role !== 'User') {
+                throw new common_1.ForbiddenException('Access restricted to users with the "User" role');
+            }
+            // Genera un nuevo token JWT
+            const payload = { sub: user.id, role: user.role };
+            const token = this.jwtService.sign(payload, { expiresIn: '14d' });
+            // Reemplaza la cookie existente (se sobrescribe si tiene el mismo nombre)
             res.cookie('Authentication', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production', // Solo en producción
                 maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+                sameSite: 'none', // Permite solicitudes entre dominios (necesario con Localtunnel)
             });
-            res.status(common_2.HttpStatus.OK).json({ message: 'Login successful' });
+            res.cookie('userEmail', user.email, {
+                httpOnly: false,
+                secure: process.env.NODE_ENV === 'production',
+                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+                sameSite: 'none', // Necesario para permitir el acceso entre dominios
+            });
+            res.cookie('userId', user.id, {
+                httpOnly: false,
+                secure: process.env.NODE_ENV === 'production',
+                maxAge: 7 * 24 * 60 * 60 * 1000,
+                sameSite: 'none', // Permite enviar las cookies entre dominios
+            });
+            // Envía una respuesta con éxito
+            res.status(common_2.HttpStatus.OK).json({
+                message: 'Login successful - Token renewed',
+                user: { email: user.email },
+            });
         });
     }
+    /*   async login(email: string, password: string, res: ExpressResponse): Promise<void> {
+        const user = await this.usersService.validateUser(email, password);
+        if (!user) {
+          throw new UnauthorizedException('Invalid email or password');
+        }
+      
+        // Genera el token JWT con el ID del usuario
+        const payload = { sub: user.id , role: user.role};
+        const token = this.jwtService.sign(payload, { expiresIn: '7d' });
+      
+        // Configura la cookie de autenticación (JWT)
+        res.cookie('Authentication', token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+        });
+      
+        // Configura una cookie adicional para almacenar el email del usuario
+        res.cookie('userEmail', user.email, {
+          httpOnly: false, // Permite el acceso desde el cliente si es necesario
+          secure: process.env.NODE_ENV === 'production',
+          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+        });
+    
+        res.cookie('userId', user.id, {
+          httpOnly: false, // Protege la cookie de ser accedida por JavaScript en el lado del cliente
+          secure: process.env.NODE_ENV === 'production', // Solo se enviará en entornos seguros (HTTPS)
+          maxAge: 7 * 24 * 60 * 60 * 1000, // La cookie estará disponible por 7 días
+        });
+        
+      
+        // Envía una respuesta con éxito
+        res.status(HttpStatus.OK).json({
+          message: 'Login successful',
+          user: { email: user.email },
+        });
+      } */
     // Cerrar sesión eliminando la cookie
     logout(res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -98,13 +159,18 @@ let AuthService = class AuthService {
         });
     }
     // Verificación de correo electrónico
-    verifyEmail(userId) {
+    verifyEmail(verificationToken) {
         return __awaiter(this, void 0, void 0, function* () {
-            const user = yield this.usersService.findOne(userId);
+            // Busca el usuario con el token de verificación
+            const user = yield this.usersService.findByVerificationToken(verificationToken);
             if (!user) {
-                throw new common_1.NotFoundException(`User with ID ${userId} not found`);
+                throw new common_1.NotFoundException('Token de verificación no válido o expirado');
             }
-            yield this.usersService.activateUser(userId);
+            // Cambia el rol del usuario a "User" y elimina el token de verificación
+            user.role = 'User';
+            user.verificationToken = null; // Elimina el token de verificación
+            yield this.usersService.save(user);
+            return user;
         });
     }
     // Obtención de usuario autenticado
@@ -114,13 +180,13 @@ let AuthService = class AuthService {
             if (!token) {
                 throw new common_1.UnauthorizedException('No authentication token');
             }
-            const payload = this.jwtService.verify(token);
-            return yield this.usersService.findOne(payload.sub);
-        });
-    }
-    verifyUser(token) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.usersService.verifyUser(token); // Usa usersService para verificar el usuario
+            try {
+                const payload = this.jwtService.verify(token);
+                return yield this.usersService.findOne(payload.sub);
+            }
+            catch (e) {
+                throw new common_1.UnauthorizedException('Invalid or expired token');
+            }
         });
     }
 };

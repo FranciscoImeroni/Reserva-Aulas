@@ -17,19 +17,19 @@ let AulaVariable = class AulaVariable {
 };
 exports.AulaVariable = AulaVariable;
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)(),
-    __metadata("design:type", Number)
+    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    __metadata("design:type", String)
 ], AulaVariable.prototype, "id", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => aula_entity_1.Aula, (aula) => aula.variables),
     __metadata("design:type", aula_entity_1.Aula)
 ], AulaVariable.prototype, "aula", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => variable_entity_1.Variable),
+    (0, typeorm_1.ManyToOne)(() => variable_entity_1.Variable, (variable) => variable.aulas),
     __metadata("design:type", variable_entity_1.Variable)
 ], AulaVariable.prototype, "variable", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
+    (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], AulaVariable.prototype, "valor", void 0);
 exports.AulaVariable = AulaVariable = __decorate([

@@ -12,25 +12,35 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Aula = void 0;
 // aula.entity.ts
 const typeorm_1 = require("typeorm");
-const aula_variable_entity_1 = require("../entities/aula-variable.entity");
 const booking_entity_1 = require("../../booking/entity/booking.entity");
+const variable_entity_1 = require("./variable.entity");
+const aula_variable_entity_1 = require("./aula-variable.entity");
 let Aula = class Aula {
 };
 exports.Aula = Aula;
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)(),
-    __metadata("design:type", Number)
+    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    __metadata("design:type", String)
 ], Aula.prototype, "id", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
-], Aula.prototype, "nombre", void 0);
+], Aula.prototype, "name", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => aula_variable_entity_1.AulaVariable, (aulaVariable) => aulaVariable.aula, { cascade: true }),
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", Number)
+], Aula.prototype, "capacity", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => aula_variable_entity_1.AulaVariable, (aulaVariable) => aulaVariable.aula, { eager: true }),
+    __metadata("design:type", Array)
+], Aula.prototype, "aulaVariables", void 0);
+__decorate([
+    (0, typeorm_1.ManyToMany)(() => variable_entity_1.Variable),
+    (0, typeorm_1.JoinTable)(),
     __metadata("design:type", Array)
 ], Aula.prototype, "variables", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => booking_entity_1.Booking, (booking) => booking.aula, { cascade: true }),
+    (0, typeorm_1.OneToMany)(() => booking_entity_1.Booking, (booking) => booking.aula),
     __metadata("design:type", Array)
 ], Aula.prototype, "bookings", void 0);
 exports.Aula = Aula = __decorate([

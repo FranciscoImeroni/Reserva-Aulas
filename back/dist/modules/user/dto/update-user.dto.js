@@ -16,12 +16,6 @@ class UpdateUserDto {
 exports.UpdateUserDto = UpdateUserDto;
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.Length)(2, 30),
-    __metadata("design:type", String)
-], UpdateUserDto.prototype, "name", void 0);
-__decorate([
-    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEmail)(),
     __metadata("design:type", String)
 ], UpdateUserDto.prototype, "email", void 0);

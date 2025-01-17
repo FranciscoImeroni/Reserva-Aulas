@@ -11,12 +11,11 @@ import { Aula } from './modules/aula/entities/aula.entity';
 import { Variable } from './modules/aula/entities/variable.entity';
 import { BookingModule } from './modules/booking/booking.module';
 import { Booking } from './modules/booking/entity/booking.entity';
-// Importa tus otros módulos
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true,  // Esto hace que el ConfigModule esté disponible en toda la aplicación
+      isGlobal: true,
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
@@ -36,7 +35,7 @@ import { Booking } from './modules/booking/entity/booking.entity';
     AuthModule,
     MailModule,
     AulasModule,
-    BookingModule
+    BookingModule,
     // Agrega otros módulos
   ],
 })

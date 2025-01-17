@@ -26,30 +26,49 @@ exports.BookingController = void 0;
 const common_1 = require("@nestjs/common");
 const booking_service_1 = require("./booking.service");
 const booking_dto_1 = require("./dto/booking.dto");
+const user_entity_1 = require("../user/entity/user.entity");
+const roles_decorators_1 = require("../../Decorators/roles.decorators");
+const roles_enum_1 = require("../user/dto/roles.enum");
+const jwt_auth_guard_1 = require("../auth/guard/jwt-auth.guard");
 let BookingController = class BookingController {
     constructor(bookingService) {
         this.bookingService = bookingService;
     }
-    createBooking(createBookingDto) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.bookingService.createBooking(createBookingDto);
-        });
+    create(createBookingDto, user) {
+        console.log('Datos recibidos en el DTO:', createBookingDto);
+        console.log('Usuario autenticado:', user);
+        return this.bookingService.createBooking(createBookingDto, user);
     }
+    /*
+        @Post()
+        @Roles(Role.Admin, Role.User)
+        create(@Body() createBookingDto: CreateBookingDto) {
+          console.log('Datos recibidos en el DTO:', createBookingDto);
+          return this.bookingService.createBooking(createBookingDto);
+        }
+       */
     getAllBookings() {
         return __awaiter(this, void 0, void 0, function* () {
             return this.bookingService.getAllBookings();
         });
     }
-    getBookingById(id) {
+    getBookingsByUserId(userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.bookingService.getBookingById(id);
+            return this.bookingService.getBookingsByUserId(userId);
         });
     }
-    updateBooking(id, createBookingDto) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.bookingService.updateBooking(id, createBookingDto);
-        });
-    }
+    /*   @Get('reservas/:aulaId/:fecha')
+    async getBookingsForDay(
+      @Param('aulaId') aulaId: string,
+      @Param('fecha') fecha: string,
+    ): Promise<Booking[]> {
+      return this.bookingService.getBookingsForDay(aulaId, fecha);
+    } */
+    /*   @Put(':id')
+      async updateBooking(@Param('id') id: string, @Body() createBookingDto: CreateBookingDto) {
+        return this.bookingService.updateBooking(id, createBookingDto);
+      }
+     */
     deleteBooking(id) {
         return __awaiter(this, void 0, void 0, function* () {
             return this.bookingService.deleteBooking(id);
@@ -59,11 +78,12 @@ let BookingController = class BookingController {
 exports.BookingController = BookingController;
 __decorate([
     (0, common_1.Post)(),
+    (0, roles_decorators_1.Roles)(roles_enum_1.Role.Admin, roles_enum_1.Role.User),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [booking_dto_1.CreateBookingDto]),
-    __metadata("design:returntype", Promise)
-], BookingController.prototype, "createBooking", null);
+    __metadata("design:paramtypes", [booking_dto_1.CreateBookingDto, user_entity_1.User]),
+    __metadata("design:returntype", void 0)
+], BookingController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
     __metadata("design:type", Function),
@@ -71,20 +91,13 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], BookingController.prototype, "getAllBookings", null);
 __decorate([
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Get)('user/:userId') // Ruta: /bookings/user/:userId
+    ,
+    __param(0, (0, common_1.Param)('userId', new common_1.ParseUUIDPipe())),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number]),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
-], BookingController.prototype, "getBookingById", null);
-__decorate([
-    (0, common_1.Put)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, booking_dto_1.CreateBookingDto]),
-    __metadata("design:returntype", Promise)
-], BookingController.prototype, "updateBooking", null);
+], BookingController.prototype, "getBookingsByUserId", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id')),
@@ -94,5 +107,6 @@ __decorate([
 ], BookingController.prototype, "deleteBooking", null);
 exports.BookingController = BookingController = __decorate([
     (0, common_1.Controller)('bookings'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.RolesGuard),
     __metadata("design:paramtypes", [booking_service_1.BookingService])
 ], BookingController);

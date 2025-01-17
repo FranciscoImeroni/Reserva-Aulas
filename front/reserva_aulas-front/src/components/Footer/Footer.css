@@ -1,0 +1,22 @@
+.footer {
+    text-align: center;
+    padding: 20px;
+    background-color: #333;
+    color: white;
+  }
+  
+  .footer-links {
+    margin-top: 10px;
+  }
+  
+  .footer-links a {
+    text-decoration: none;
+    margin: 0 10px;
+    color: white;
+    font-size: 1rem;
+  }
+  
+  .footer-links a:hover {
+    color: #ff9900; /* Efecto hover */
+  }
+  

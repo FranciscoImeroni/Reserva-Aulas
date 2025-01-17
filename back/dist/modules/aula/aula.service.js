@@ -34,22 +34,29 @@ let AulasService = class AulasService {
         this.variableRepository = variableRepository;
         this.aulaVariableRepository = aulaVariableRepository;
     }
-    // CRUD para Aula
-    createAula(nombre) {
+    create(createAulaDto) {
         return __awaiter(this, void 0, void 0, function* () {
-            const aula = this.aulaRepository.create({ nombre });
+            const aula = this.aulaRepository.create(createAulaDto);
             return yield this.aulaRepository.save(aula);
         });
     }
-    getAulas() {
+    /*   async getAulas(): Promise<Aula[]> {
+        return await this.aulaRepository.find({ relations: ['variables'] });
+      } */
+    findAll() {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.aulaRepository.find({ relations: ['variables'] });
+            return this.aulaRepository.find();
+        });
+    }
+    findAllVariables() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.variableRepository.find();
         });
     }
     // CRUD para Variable
-    createVariable(nombre, esOpcional) {
+    createVariable(name) {
         return __awaiter(this, void 0, void 0, function* () {
-            const variable = this.variableRepository.create({ nombre, esOpcional });
+            const variable = this.variableRepository.create({ name });
             return yield this.variableRepository.save(variable);
         });
     }
@@ -74,6 +81,69 @@ let AulasService = class AulasService {
             });
             // Guardar la nueva entidad aulaVariable
             return yield this.aulaVariableRepository.save(aulaVariable);
+        });
+    }
+    findAulaById(aulaId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const aula = yield this.aulaRepository.findOneBy({ id: aulaId });
+            if (!aula) {
+                throw new common_1.NotFoundException(`Aula with ID ${aulaId} not found`);
+            }
+            return aula;
+        });
+    }
+    /*   async getVariablesByAulaId(aulaId: string): Promise<Variable[]> {
+        console.log('Valor de aulaId:', aulaId);
+        if (!aulaId) {
+          throw new Error('El ID del aula no puede ser undefined');
+        }
+      
+        const aula = await this.aulaRepository.findOne({
+          where: { id: aulaId },
+          relations: ['variables'],
+        });
+      
+        if (!aula) {
+          throw new Error('Aula no encontrada');
+        }
+      
+        console.log('Aula encontrada:', aula);
+        console.log('Variables asociadas:', aula.variables);
+      
+        return aula.variables;
+      }
+       */
+    getVariablesByAulaId(aulaId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log('Valor de aulaId:', aulaId);
+            if (!aulaId) {
+                throw new Error('El ID del aula no puede ser undefined');
+            }
+            const aula = yield this.aulaRepository.findOne({
+                where: { id: aulaId },
+                relations: ['aulaVariables', 'aulaVariables.variable'], // Cargar relaciones necesarias
+            });
+            if (!aula) {
+                throw new Error('Aula no encontrada');
+            }
+            // Construir un arreglo de las variables con sus valores
+            const variables = aula.aulaVariables.map((aulaVariable) => ({
+                id: aulaVariable.variable.id,
+                name: aulaVariable.variable.name,
+                valor: aulaVariable.valor,
+            }));
+            console.log('Variables asociadas:', variables);
+            return variables;
+        });
+    }
+    getVariableNamesByIds(ids) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!ids || ids.length === 0) {
+                throw new common_1.BadRequestException('The ID array cannot be empty');
+            }
+            const variables = yield this.variableRepository.findBy({ id: (0, typeorm_2.In)(ids) });
+            const names = variables.map((variable) => variable.name);
+            return names.length > 0 ? names : ['Unknown Variables'];
         });
     }
 };

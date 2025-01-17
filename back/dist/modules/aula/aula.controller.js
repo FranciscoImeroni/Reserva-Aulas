@@ -24,18 +24,28 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AulasController = void 0;
 const common_1 = require("@nestjs/common");
 const aula_service_1 = require("./aula.service");
+const CreateAulaDto_dto_1 = require("./dto/CreateAulaDto.dto");
 let AulasController = class AulasController {
     constructor(aulasService) {
         this.aulasService = aulasService;
     }
-    createAula(nombre) {
+    create(createAulaDto) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.aulasService.createAula(nombre);
+            return this.aulasService.create(createAulaDto);
         });
     }
-    getAulas() {
+    /*   @Get()
+      async getAulas() {
+        return await this.aulasService.getAulas();
+      } */
+    getAllAulas() {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.aulasService.getAulas();
+            return this.aulasService.findAll();
+        });
+    }
+    getAllVariables() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.aulasService.findAllVariables();
         });
     }
     assignVariableToAula(aulaId, variableId, valor) {
@@ -43,30 +53,90 @@ let AulasController = class AulasController {
             return yield this.aulasService.assignVariableToAula(aulaId, variableId, valor);
         });
     }
+    createVariable(name) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.aulasService.createVariable(name);
+        });
+    }
+    getVariablesByAulaId(aulaId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log('Valor de aulaId:', aulaId); // Asegúrate de que se imprime correctamente
+            if (!aulaId) {
+                throw new common_1.BadRequestException('El ID del aula es requerido');
+            }
+            return yield this.aulasService.getVariablesByAulaId(aulaId);
+        });
+    }
+    getAulaById(aulaId) {
+        return this.aulasService.findAulaById(aulaId);
+    }
+    getVariableNames(ids) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!ids || !Array.isArray(ids) || ids.length === 0) {
+                throw new common_1.HttpException('Invalid or missing IDs array', common_1.HttpStatus.BAD_REQUEST);
+            }
+            const names = yield this.aulasService.getVariableNamesByIds(ids);
+            return { names };
+        });
+    }
 };
 exports.AulasController = AulasController;
 __decorate([
     (0, common_1.Post)(),
-    __param(0, (0, common_1.Body)('nombre')),
+    __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [CreateAulaDto_dto_1.CreateAulaDto]),
     __metadata("design:returntype", Promise)
-], AulasController.prototype, "createAula", null);
+], AulasController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
-], AulasController.prototype, "getAulas", null);
+], AulasController.prototype, "getAllAulas", null);
 __decorate([
-    (0, common_1.Post)(':aulaId/variable'),
+    (0, common_1.Get)('Variables'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], AulasController.prototype, "getAllVariables", null);
+__decorate([
+    (0, common_1.Post)(':aulaId/assignVariable'),
     __param(0, (0, common_1.Param)('aulaId')),
     __param(1, (0, common_1.Body)('variableId')),
     __param(2, (0, common_1.Body)('valor')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Number, String]),
+    __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", Promise)
 ], AulasController.prototype, "assignVariableToAula", null);
+__decorate([
+    (0, common_1.Post)('createVariable'),
+    __param(0, (0, common_1.Body)('name')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AulasController.prototype, "createVariable", null);
+__decorate([
+    (0, common_1.Get)(':aulaId/variables'),
+    __param(0, (0, common_1.Param)('aulaId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AulasController.prototype, "getVariablesByAulaId", null);
+__decorate([
+    (0, common_1.Get)(':aulaId'),
+    __param(0, (0, common_1.Param)('aulaId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], AulasController.prototype, "getAulaById", null);
+__decorate([
+    (0, common_1.Post)('names'),
+    __param(0, (0, common_1.Body)('ids')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AulasController.prototype, "getVariableNames", null);
 exports.AulasController = AulasController = __decorate([
     (0, common_1.Controller)('aulas'),
     __metadata("design:paramtypes", [aula_service_1.AulasService])

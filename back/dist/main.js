@@ -1,4 +1,52 @@
 "use strict";
+/* import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { ValidationPipe } from '@nestjs/common';
+import cookieParser from 'cookie-parser';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  app.useGlobalPipes(new ValidationPipe({
+    transform: true,
+    whitelist: true,
+  }));
+  app.use(cookieParser());
+  app.enableCors({
+    origin: process.env.DOMAIN_FRONT,
+    credentials: true,
+  });
+  await app.listen(3000);
+  console.log("App listening on port 3000");
+}
+
+bootstrap();
+ */
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -15,17 +63,38 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@nestjs/core");
 const app_module_1 = require("./app.module");
 const common_1 = require("@nestjs/common");
-const cookie_parser_1 = __importDefault(require("cookie-parser")); // Importación corregida
+const cookie_parser_1 = __importDefault(require("cookie-parser"));
+const dotenv = __importStar(require("dotenv"));
+dotenv.config();
 function bootstrap() {
     return __awaiter(this, void 0, void 0, function* () {
         const app = yield core_1.NestFactory.create(app_module_1.AppModule);
+        // Configurar validaciones globales
         app.useGlobalPipes(new common_1.ValidationPipe({
-            transform: true, // Permite que se transformen los objetos según el DTO
-            whitelist: true, // Elimina propiedades no especificadas en el DTO
+            transform: true,
+            whitelist: true,
         }));
-        app.use((0, cookie_parser_1.default)()); // Usa cookie-parser como middleware
+        // Usar cookie-parser
+        app.use((0, cookie_parser_1.default)());
+        // Configuración de CORS
+        const allowedOrigins = [
+            process.env.DOMAIN_FRONT || 'http://localhost:4000', // URL local
+            'https://puny-shirts-poke.loca.lt' // URL Localtunnel
+        ];
+        app.enableCors({
+            origin: (origin, callback) => {
+                if (!origin || allowedOrigins.includes(origin)) {
+                    callback(null, true);
+                }
+                else {
+                    console.error(`CORS error: Origin ${origin} not allowed.`);
+                    callback(new Error('Not allowed by CORS'));
+                }
+            },
+            credentials: true, // Permitir envío de cookies
+        });
         yield app.listen(3000);
-        console.log("App listening on port 3000");
+        console.log('App listening on port 3000');
     });
 }
 bootstrap();

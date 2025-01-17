@@ -4,15 +4,15 @@ import { Variable } from './variable.entity';
 
 @Entity()
 export class AulaVariable {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @ManyToOne(() => Aula, (aula) => aula.variables)
   aula: Aula;
 
-  @ManyToOne(() => Variable)
+  @ManyToOne(() => Variable, (variable) => variable.aulas)
   variable: Variable;
-
-  @Column({ nullable: true })
-  valor: string; // Ej. "activado" o "apagado" para el proyector
+  
+  @Column()
+  valor: string; // Valor asociado a la variable
 }

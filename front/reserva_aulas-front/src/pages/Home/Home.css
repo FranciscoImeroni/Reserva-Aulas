@@ -1,0 +1,17 @@
+.home {
+  padding: 2rem;
+  text-align: center;
+}
+
+.aulas-list {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 24px;
+  color: #333;
+}
