@@ -1,0 +1,51 @@
+/* El Sidebar estará oculto por defecto */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: -250px;
+    width: 250px;
+    height: 100%;
+    background-color: #111;
+    color: white;
+    transition: left 0.3s ease;
+  }
+  
+  .sidebar.open {
+    left: 0;  /* Cuando se abre, se mueve al lado izquierdo */
+  }
+  
+  .sidebar-header {
+    padding: 10px;
+    background-color: #222;
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 30px;
+    cursor: pointer;
+  }
+  
+  .sidebar-content ul {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 20px;
+  }
+  
+  .sidebar-content li {
+    padding: 15px;
+    text-align: left;
+  }
+  
+  .sidebar-content a {
+    color: white;
+    text-decoration: none;
+  }
+  
+  .sidebar-content a:hover {
+    background-color: #444;
+  }
+  

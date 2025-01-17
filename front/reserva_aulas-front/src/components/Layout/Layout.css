@@ -1,0 +1,12 @@
+.layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  
+  .layout-content {
+    flex: 1; /* Esto asegura que el contenido principal ocupe todo el espacio disponible */
+    padding: 20px;
+    background-color: #f9f9f9;
+  }
+  

@@ -16,27 +16,31 @@ class CreateBookingDto {
 }
 exports.CreateBookingDto = CreateBookingDto;
 __decorate([
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsDateString)(),
-    __metadata("design:type", Date)
-], CreateBookingDto.prototype, "start", void 0);
-__decorate([
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsDateString)(),
-    __metadata("design:type", Date)
-], CreateBookingDto.prototype, "end", void 0);
-__decorate([
-    (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], CreateBookingDto.prototype, "description", void 0);
+], CreateBookingDto.prototype, "aulaName", void 0);
 __decorate([
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateBookingDto.prototype, "activityName", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)
 ], CreateBookingDto.prototype, "aulaId", void 0);
 __decorate([
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsArray)(),
+    __metadata("design:type", Array)
+], CreateBookingDto.prototype, "selectedVariables", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    __metadata("design:type", Array)
+], CreateBookingDto.prototype, "reservationDays", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    __metadata("design:type", Array)
+], CreateBookingDto.prototype, "reservationHours", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)() // Usamos UUID porque es el tipo de id en User
+    ,
     __metadata("design:type", String)
 ], CreateBookingDto.prototype, "userId", void 0);

@@ -1,24 +1,37 @@
 // dto/booking.dto.ts
-import { IsNotEmpty, IsDateString, IsString, IsNumber } from 'class-validator';
+import { IsUUID, IsString, IsArray, IsOptional, IsDateString } from 'class-validator';
 
 export class CreateBookingDto {
-  @IsNotEmpty()
-  @IsDateString()
-  start: Date;
-
-  @IsNotEmpty()
-  @IsDateString()
-  end: Date;
-
-  @IsNotEmpty()
   @IsString()
-  description: string;
+  aulaName: string;
 
-  @IsNotEmpty()
-  @IsNumber()
-  aulaId: string; 
-
-  @IsNotEmpty()
   @IsString()
-  userId: string; 
+  activityName: string;
+
+  @IsUUID()
+  aulaId: string;
+  
+  @IsArray()
+  selectedVariables: string[];
+
+  @IsArray()
+  reservationDays: string[];
+
+  @IsArray()
+  reservationHours: string[];
+
+  @IsUUID() // Usamos UUID porque es el tipo de id en User
+  userId: string; // El ID del usuario que hace la reserva
+
+/*   @IsOptional()
+  @IsDateString()
+  start?: Date;
+
+  @IsOptional()
+  @IsDateString()
+  end?: Date;
+
+  @IsOptional()
+  @IsString()
+  description?: string; */
 }

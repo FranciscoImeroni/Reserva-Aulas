@@ -10,10 +10,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Booking = void 0;
-// entity/booking.entity.ts
+// booking.entity.ts
 const typeorm_1 = require("typeorm");
+const user_entity_1 = require("../../user/entity/user.entity"); // Asegúrate de importar la entidad User
 const aula_entity_1 = require("../../aula/entities/aula.entity");
-const user_entity_1 = require("../../user/entity/user.entity");
 let Booking = class Booking {
 };
 exports.Booking = Booking;
@@ -23,24 +23,44 @@ __decorate([
 ], Booking.prototype, "id", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
-    __metadata("design:type", Date)
-], Booking.prototype, "start", void 0);
-__decorate([
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", Date)
-], Booking.prototype, "end", void 0);
+    __metadata("design:type", String)
+], Booking.prototype, "aulaName", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
-], Booking.prototype, "description", void 0);
+], Booking.prototype, "activityName", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => aula_entity_1.Aula, (aula) => aula.bookings),
+    (0, typeorm_1.Column)('text', { array: true }),
+    __metadata("design:type", Array)
+], Booking.prototype, "selectedVariables", void 0);
+__decorate([
+    (0, typeorm_1.Column)('text', { array: true }),
+    __metadata("design:type", Array)
+], Booking.prototype, "reservationDays", void 0);
+__decorate([
+    (0, typeorm_1.Column)('text', { array: true }),
+    __metadata("design:type", Array)
+], Booking.prototype, "reservationHours", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => user_entity_1.User, (user) => user.bookings, { nullable: false }) // Define que un booking tiene un único usuario
+    ,
+    (0, typeorm_1.JoinColumn)({ name: 'userId' }) // Especifica el nombre de la columna de la clave foránea
+    ,
+    __metadata("design:type", user_entity_1.User)
+], Booking.prototype, "user", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => aula_entity_1.Aula, (aula) => aula.bookings, { nullable: false }),
+    (0, typeorm_1.JoinColumn)({ name: 'aulaId' }),
     __metadata("design:type", aula_entity_1.Aula)
 ], Booking.prototype, "aula", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => user_entity_1.User, (user) => user.bookings),
-    __metadata("design:type", user_entity_1.User)
-], Booking.prototype, "user", void 0);
+    (0, typeorm_1.Column)({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' }),
+    __metadata("design:type", Date)
+], Booking.prototype, "createdAt", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'timestamp', nullable: true }),
+    __metadata("design:type", Object)
+], Booking.prototype, "updatedAt", void 0);
 exports.Booking = Booking = __decorate([
-    (0, typeorm_1.Entity)()
+    (0, typeorm_1.Entity)({ name: 'bookings' })
 ], Booking);
