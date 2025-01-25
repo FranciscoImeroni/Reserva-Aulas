@@ -14,9 +14,6 @@ const MisReservas = () => {
         setLoading(true);
         setError(null);
 
-        
-       //const userId = "e6b3d031-d5db-46c0-b251-c24327afdca6" LOCALTUNNEL
-
         const userId = Cookies.get('userId');
         console.log('User ID from cookie:', userId); 
 

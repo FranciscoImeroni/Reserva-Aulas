@@ -14,7 +14,7 @@ async function bootstrap() {
   }));
   app.use(cookieParser());
   app.enableCors({
-    origin: process.env.DOMAIN_FRONT, 
+    origin: process.env.DOMAIN_FRONT || "http://localhost:4000", 
     credentials: true,             
   });
   await app.listen(3000);

@@ -207,14 +207,13 @@ const Confirmation = () => {
     }
   }, [selectedVariables]);
 
-  //const userId = "e6b3d031-d5db-46c0-b251-c24327afdca6" LOCALTUNNEL
 
   const handleConfirmReservation = () => {
     if (!userId) {
       console.error('User ID is missing.');
       return; 
     }
-
+  
     const newReservation = {
       aulaName,
       activityName,
@@ -224,18 +223,19 @@ const Confirmation = () => {
       userId,
       aulaId,
     };
-
+  
     console.log('Datos enviados al backend:', newReservation);
-
+  
     dispatch(createReservation(newReservation))
-      .then(() => {
-        console.log('Reserva creada exitosamente');
+      .then((response) => {
+        console.log('Reserva creada exitosamente', response);
         navigate('/Home');
       })
       .catch((error) => {
         console.error('Error al crear la reserva:', error);
       });
   };
+  
 
   const handleBack = () => {
     navigate(`/Reserva3/${aulaId}`);

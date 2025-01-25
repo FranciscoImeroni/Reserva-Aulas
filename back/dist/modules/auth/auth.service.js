@@ -56,19 +56,14 @@ let AuthService = class AuthService {
         this.jwtService = jwtService;
         this.mailService = mailService;
     }
-    // Registro de usuario
     register(createUserDto) {
         return __awaiter(this, void 0, void 0, function* () {
             const existingUser = yield this.usersService.findByEmail(createUserDto.email);
             if (existingUser) {
                 throw new common_1.UnauthorizedException('User already exists with this email');
             }
-            // Genera un token de verificación
             const verificationToken = crypto.randomBytes(32).toString('hex');
-            // Crea el usuario con el rol "Unverified" y el token de verificación
-            const user = yield this.usersService.createUser(Object.assign(Object.assign({}, createUserDto), { role: 'Unverified', // Asigna el rol por defecto "Unverified"
-                verificationToken }));
-            // Envía el correo de verificación con el enlace
+            const user = yield this.usersService.createUser(Object.assign(Object.assign({}, createUserDto), { role: 'Unverified', verificationToken }));
             const DOMAIN_BACK = process.env.DOMAIN_BACK;
             const verificationLink = `${DOMAIN_BACK}/auth/verify?token=${verificationToken}`;
             yield this.mailService.sendMail(createUserDto.email, 'Verifica tu cuenta', 'Por favor, verifica tu cuenta usando el siguiente enlace.', `<p>Bienvenido! Verifica tu cuenta con el siguiente enlace: <a href="${verificationLink}">Verificar cuenta</a></p>`);
@@ -77,7 +72,6 @@ let AuthService = class AuthService {
     }
     login(email, password, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            // Validación del usuario
             const user = yield this.usersService.validateUser(email, password);
             if (!user) {
                 throw new common_1.UnauthorizedException('Invalid email or password');
@@ -85,29 +79,24 @@ let AuthService = class AuthService {
             if (user.role !== 'User') {
                 throw new common_1.ForbiddenException('Access restricted to users with the "User" role');
             }
-            // Genera un nuevo token JWT
             const payload = { sub: user.id, role: user.role };
             const token = this.jwtService.sign(payload, { expiresIn: '14d' });
-            // Reemplaza la cookie existente (se sobrescribe si tiene el mismo nombre)
+            console.log('Token generado:', token);
             res.cookie('Authentication', token, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production', // Solo en producción
+                secure: process.env.NODE_ENV === 'production',
                 maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
-                sameSite: 'none', // Permite solicitudes entre dominios (necesario con Localtunnel)
             });
             res.cookie('userEmail', user.email, {
                 httpOnly: false,
                 secure: process.env.NODE_ENV === 'production',
                 maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
-                sameSite: 'none', // Necesario para permitir el acceso entre dominios
             });
             res.cookie('userId', user.id, {
                 httpOnly: false,
                 secure: process.env.NODE_ENV === 'production',
                 maxAge: 7 * 24 * 60 * 60 * 1000,
-                sameSite: 'none', // Permite enviar las cookies entre dominios
             });
-            // Envía una respuesta con éxito
             res.status(common_2.HttpStatus.OK).json({
                 message: 'Login successful - Token renewed',
                 user: { email: user.email },

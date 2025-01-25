@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './modules/user/users.module';
@@ -11,6 +11,7 @@ import { Aula } from './modules/aula/entities/aula.entity';
 import { Variable } from './modules/aula/entities/variable.entity';
 import { BookingModule } from './modules/booking/booking.module';
 import { Booking } from './modules/booking/entity/booking.entity';
+import cookieParser from 'cookie-parser';
 
 @Module({
   imports: [
@@ -39,4 +40,9 @@ import { Booking } from './modules/booking/entity/booking.entity';
     // Agrega otros módulos
   ],
 })
-export class AppModule {}
+//export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(cookieParser()).forRoutes('*');
+  }
+}

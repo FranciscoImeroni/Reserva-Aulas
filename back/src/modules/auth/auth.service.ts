@@ -60,30 +60,31 @@ export class AuthService {
       throw new ForbiddenException('Access restricted to users with the "User" role');
     }
   
-    // Genera un nuevo token JWT
     const payload = { sub: user.id, role: user.role };
     const token = this.jwtService.sign(payload, { expiresIn: '14d' });
+
+    console.log('Token generado:', token);
+
+    
   
     res.cookie('Authentication', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production', 
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
-      sameSite: 'none', // Permite solicitudes entre dominios (necesario con Localtunnel)
     });
     
     res.cookie('userEmail', user.email, {
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
-      sameSite: 'none', // Necesario para permitir el acceso entre dominios
     });
     
     res.cookie('userId', user.id, {
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      sameSite: 'none', // Permite enviar las cookies entre dominios
     });
+    
     
   
     res.status(HttpStatus.OK).json({

@@ -132,7 +132,6 @@ const App = () => {
   );
 };
 
-// Exporta el componente App como una variable con nombre
 const AppWithProvider = () => (
   <Provider store={store}>
     <App />

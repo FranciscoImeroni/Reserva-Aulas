@@ -1,0 +1,16 @@
+# Configuración de la Base de Datos
+DB_NAME=reserva_aulas_test
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=Morena_007
+
+# Configuración de Autenticación JWT
+JWT_SECRET=TestSecret123456789
+
+# Configuración del Correo Electrónico
+MAIL_USER=prueba_email@gmail.com
+MAIL_PASSWORD=prueba_password123
+
+# Configuración del Dominio de la Aplicación
+APP_DOMAIN=https://test.reserva-aulas.com
