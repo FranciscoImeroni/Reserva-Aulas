@@ -155,7 +155,6 @@ export class AuthService {
     user.role = 'User';
     user.verificationToken = null; // Elimina el token de verificación
     await this.usersService.save(user);
-  
     return user;
   }
   

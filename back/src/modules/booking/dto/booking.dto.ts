@@ -1,5 +1,6 @@
 // dto/booking.dto.ts
-import { IsUUID, IsString, IsArray, IsOptional, IsDateString } from 'class-validator';
+import { IsUUID, IsString, IsArray, IsOptional, IsDateString, Matches } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class CreateBookingDto {
   @IsString()
@@ -15,6 +16,16 @@ export class CreateBookingDto {
   selectedVariables: string[];
 
   @IsArray()
+  @Transform(({ value }) => {
+    if (Array.isArray(value)) {
+      return value.map(date => {
+        const parsedDate = new Date(date);
+        return parsedDate.toISOString().split('T')[0];
+      });
+    }
+    return value;
+  })
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, { each: true, message: 'Las fechas deben estar en formato YYYY-MM-DD' })
   reservationDays: string[];
 
   @IsArray()

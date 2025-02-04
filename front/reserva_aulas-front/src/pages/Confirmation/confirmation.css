@@ -45,3 +45,15 @@
     
   }
   
+.error-message {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 15px;
+  border-radius: 5px;
+  margin-top: 15px;
+  border: 1px solid #ef9a9a;
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+}
+  

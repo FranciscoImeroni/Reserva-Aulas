@@ -46,6 +46,7 @@ function bootstrap() {
         const app = yield core_1.NestFactory.create(app_module_1.AppModule);
         app.useGlobalPipes(new common_1.ValidationPipe({
             transform: true,
+            transformOptions: { enableImplicitConversion: true },
             whitelist: true,
         }));
         app.use((0, cookie_parser_1.default)());

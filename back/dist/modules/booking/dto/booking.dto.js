@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateBookingDto = void 0;
 // dto/booking.dto.ts
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
 class CreateBookingDto {
 }
 exports.CreateBookingDto = CreateBookingDto;
@@ -33,6 +34,16 @@ __decorate([
 ], CreateBookingDto.prototype, "selectedVariables", void 0);
 __decorate([
     (0, class_validator_1.IsArray)(),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        if (Array.isArray(value)) {
+            return value.map(date => {
+                const parsedDate = new Date(date);
+                return parsedDate.toISOString().split('T')[0];
+            });
+        }
+        return value;
+    }),
+    (0, class_validator_1.Matches)(/^\d{4}-\d{2}-\d{2}$/, { each: true, message: 'Las fechas deben estar en formato YYYY-MM-DD' }),
     __metadata("design:type", Array)
 ], CreateBookingDto.prototype, "reservationDays", void 0);
 __decorate([

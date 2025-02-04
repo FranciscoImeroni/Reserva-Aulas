@@ -35,64 +35,62 @@ let BookingService = class BookingService {
         this.userRepository = userRepository;
     }
     // Crear una nueva reserva
-    /*   async createBooking(createBookingDto: CreateBookingDto, user: User): Promise<Booking> {
-        // Buscar el aula usando el ID que viene en el DTO
-        const aula = await this.aulaRepository.findOne({ where: { id: createBookingDto.aulaId } });
-        if (!aula) {
-          throw new NotFoundException(`Aula with ID ${createBookingDto.aulaId} not found`);
-        }
-    
-        // Crear la nueva reserva asociando el usuario autenticado
-        const booking = this.bookingRepository.create({
-          ...createBookingDto,
-          user,  // Asocia el usuario autenticado a la reserva
-          aula,  // Asocia el aula seleccionada
-        });
-    
-        return await this.bookingRepository.save(booking);
-      } */
     createBooking(createBookingDto, user) {
         return __awaiter(this, void 0, void 0, function* () {
             const bookingUser = yield this.userRepository.findOne({ where: { id: createBookingDto.userId } });
             if (!bookingUser) {
-                throw new common_1.NotFoundException('User not found');
+                throw new common_1.NotFoundException('Usuario no encontrado');
             }
             const aula = yield this.aulaRepository.findOne({ where: { id: createBookingDto.aulaId } });
             if (!aula) {
-                throw new common_1.NotFoundException(`Aula with ID ${createBookingDto.aulaId} not found`);
+                throw new common_1.NotFoundException(`Aula con ID ${createBookingDto.aulaId} no encontrada`);
             }
-            console.log("creando reservaaaa");
+            // Convertir las fechas al formato correcto
+            const formattedReservationDays = createBookingDto.reservationDays.map(date => {
+                const parsedDate = new Date(date);
+                return parsedDate.toISOString().split('T')[0]; // Convierte a formato YYYY-MM-DD
+            });
+            // Verificar que la fecha de reserva sea futura
+            const bookingDate = new Date(formattedReservationDays[0]);
+            const now = new Date();
+            if (bookingDate < now) {
+                throw new common_1.BadRequestException('No se pueden crear reservas para fechas pasadas');
+            }
+            // Verificar si existe una reserva que se solape para la misma aula, día y horario
+            const overlappingBooking = yield this.bookingRepository
+                .createQueryBuilder('booking')
+                .where('booking.aulaId = :aulaId', { aulaId: createBookingDto.aulaId })
+                .andWhere('booking.reservationDays && ARRAY[:...reservationDays]', { reservationDays: formattedReservationDays })
+                .andWhere('booking.reservationHours && ARRAY[:...reservationHours]', { reservationHours: createBookingDto.reservationHours })
+                .getOne();
+            if (overlappingBooking) {
+                throw new common_1.BadRequestException('Este horario ya está reservado para el aula seleccionada en las fechas indicadas');
+            }
             const booking = this.bookingRepository.create(Object.assign(Object.assign({}, createBookingDto), { user: bookingUser, aula }));
             return yield this.bookingRepository.save(booking);
         });
     }
-    /*       async createBooking(createBookingDto: CreateBookingDto, user: User): Promise<Booking[]> {
-            const bookingUser = await this.userRepository.findOne({ where: { id: createBookingDto.userId } });
-            if (!bookingUser) {
-              throw new NotFoundException('User not found');
-            }
-          
-            const aula = await this.aulaRepository.findOne({ where: { id: createBookingDto.aulaId } });
-            if (!aula) {
-              throw new NotFoundException(`Aula with ID ${createBookingDto.aulaId} not found`);
-            }
-          
-            // Verifica si las fechas están disponibles (si hay más de una)
-            if (createBookingDto.reservationDays && createBookingDto.reservationDays.length > 0) {
-              await this.checkAvailability(createBookingDto.reservationDays, createBookingDto.aulaId);
-            }
-          
-            // Si está todo bien, crea las reservas
-            const reservations = createBookingDto.reservationDays.map((reservationDay) => {
-              return this.bookingRepository.create({
-                reservationDays: [reservationDay],
-                aula,
-                user: bookingUser,
-              });
-            });
-          
-            return await this.bookingRepository.save(reservations);
-          } */
+    /*     async createBooking(createBookingDto: CreateBookingDto, user: User): Promise<Booking> {
+          const bookingUser = await this.userRepository.findOne({ where: { id: createBookingDto.userId } });
+          if (!bookingUser) {
+            throw new NotFoundException('User not found');
+          }
+      
+          const aula = await this.aulaRepository.findOne({ where: { id: createBookingDto.aulaId } });
+          if (!aula) {
+            throw new NotFoundException(`Aula with ID ${createBookingDto.aulaId} not found`);
+          }
+    
+          console.log("creando reservaaaa")
+      
+          const booking = this.bookingRepository.create({
+            ...createBookingDto,
+            user: bookingUser,
+            aula,
+          });
+      
+          return await this.bookingRepository.save(booking);
+        } */
     // Obtener todas las reservas
     getAllBookings() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -113,31 +111,6 @@ let BookingService = class BookingService {
             return bookings;
         });
     }
-    /*   async checkAvailability(dates: string[], aulaId: string, selectedSlots: string[]): Promise<void> {
-        // Buscar reservas existentes en las fechas y aula dadas
-        const existingReservations = await this.bookingRepository
-          .createQueryBuilder('reservation')
-          .where('reservation.date IN (:...dates)', { dates })
-          .andWhere('reservation.aulaId = :aulaId', { aulaId })
-          .getMany();
-      
-        // Filtrar las horas reservadas
-    // Replace `flatMap` with `map` + `concat`
-    const reservedSlots = existingReservations.map((reservation) => {
-      const startHour = reservation.start.split('T')[1].slice(0, 5);
-      const endHour = reservation.end.split('T')[1].slice(0, 5);
-      return this.getTimeSlotsInRange(startHour, endHour);
-    }).reduce((acc, slots) => acc.concat(slots), []);
-    
-      
-        // Verificar si algún horario seleccionado está reservado
-        const conflictingSlots = selectedSlots.filter(slot => reservedSlots.includes(slot));
-        if (conflictingSlots.length > 0) {
-          throw new BadRequestException(
-            `Las siguientes horas están reservadas: ${conflictingSlots.join(', ')}`
-          );
-        }
-      } */
     getTimeSlotsInRange(start, end) {
         const slots = [];
         let startHour = parseInt(start.split(':')[0], 10);
@@ -156,31 +129,6 @@ let BookingService = class BookingService {
         }
         return slots;
     }
-    /*   async checkAvailability(dates: string[], roomId: string): Promise<void> {
-        // Buscar reservas en las fechas y aula dadas.
-        const existingReservations = await this.bookingRepository
-          .createQueryBuilder('reservation')
-          .where('reservation.date IN (:...dates)', { dates })
-          .andWhere('reservation.roomId = :roomId', { roomId })
-          .getMany();
-    
-        // Si hay alguna fecha reservada, lanzamos una excepción.
-        if (existingReservations.length > 0) {
-          const reservedDates = existingReservations.map((r) => r.reservationDays).join(', ');
-          throw new BadRequestException(
-            `La(s) fecha(s) seleccionada(s) ya está(n) reservada(s): ${reservedDates}`,
-          );
-        }
-      } */
-    /*  async getBookingsForDay(aulaId: string, fecha: string): Promise<Booking[]> {
-        const bookings = await this.bookingRepository.find({
-          where: {
-            aula: { id: aulaId },
-            start: Like(`${fecha}%`), // Filtrar reservas por fecha (ej. '2024-04-21')
-          },
-        });
-        return bookings;
-      } */
     // Actualizar una reserva
     /*   async updateBooking(id: string, dto: CreateBookingDto, user: User): Promise<Booking> {
         // Obtener la reserva por ID

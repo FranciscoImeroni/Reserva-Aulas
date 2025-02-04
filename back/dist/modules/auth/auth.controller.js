@@ -66,7 +66,6 @@ let AuthController = class AuthController {
                 const user = yield this.authService.verifyEmail(token);
                 res.status(common_1.HttpStatus.OK).json({
                     message: 'Cuenta verificada con éxito. Ahora puedes iniciar sesión.',
-                    user,
                 });
             }
             catch (error) {

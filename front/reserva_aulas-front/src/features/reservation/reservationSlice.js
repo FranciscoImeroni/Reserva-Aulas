@@ -18,29 +18,28 @@ export const createReservation = createAsyncThunk(
   'reservation/createReservation',
   async (newReservation, { rejectWithValue, getState }) => {
     try {
-      const state = getState(); // Obtener el estado de Redux para obtener el token
-      const token = state.auth.token; // Asumiendo que el token está almacenado en el estado
-
-
+      const state = getState();
+      const token = state.auth.token;
       const DOMAIN_BACK = process.env.REACT_APP_DOMAIN_BACK;
+      
       const response = await fetch(`${DOMAIN_BACK}/bookings`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`, // Agregar el token JWT aquí
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(newReservation),
       });
 
       if (!response.ok) {
-        const errorMessage = await response.text();
-        throw new Error(errorMessage || 'Error creating reservation');
+        const errorData = await response.json();
+        return rejectWithValue(errorData);
       }
 
       const data = await response.json();
       return data;
     } catch (error) {
-      return rejectWithValue(error.message || 'Failed to create reservation');
+      return rejectWithValue(error.response?.data || { message: 'Error al crear la reserva' });
     }
   }
 );

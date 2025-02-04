@@ -57,7 +57,6 @@ export class AuthController {
       const user = await this.authService.verifyEmail(token);
       res.status(HttpStatus.OK).json({
         message: 'Cuenta verificada con éxito. Ahora puedes iniciar sesión.',
-        user,
       });
     } catch (error) {
       res.status(HttpStatus.BAD_REQUEST).json({
