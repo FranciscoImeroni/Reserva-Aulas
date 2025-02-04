@@ -25,6 +25,7 @@ const Confirmation = () => {
   const [selectedVariableNames, setSelectedVariableNames] = useState([]);
   const [userId, setUserId] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
 
   useEffect(() => {
     // Obtener el userId de la cookie
@@ -62,30 +63,40 @@ const Confirmation = () => {
       return; 
     }
   
+    // Ensure the dates are in a valid format
+    const formattedDays = reservationDays.map(date => {
+      try {
+        const [day, month, year] = date.split('/');
+        const formattedDate = new Date(`${year}-${month}-${day}`);
+        return formattedDate.toISOString().split('T')[0];
+      } catch (error) {
+        console.error('Invalid date format:', date);
+        return null;
+      }
+    }).filter(date => date !== null);
+  
     const newReservation = {
       aulaName,
       activityName,
       selectedVariables,
-      reservationDays,
+      reservationDays: formattedDays,
       reservationHours,
       userId,
       aulaId,
     };
   
-    console.log('Datos enviados al backend:', newReservation);
-  
     dispatch(createReservation(newReservation))
       .unwrap()
       .then((response) => {
         console.log('Reserva creada exitosamente', response);
-        navigate('/Home');
+        setSuccessMessage('¡Reserva creada exitosamente!');
+        setTimeout(() => {
+          navigate('/Home');
+        }, 5000);
       })
       .catch((error) => {
         console.error('Error al crear la reserva:', error);
-        // Extraer el mensaje de error del objeto de error
-        const errorMsg = typeof error === 'object' && error.message 
-          ? error.message 
-          : 'Error al crear la reserva. Por favor, inténtalo de nuevo.';
+        const errorMsg = error.message || 'Error al crear la reserva. Por favor, inténtalo de nuevo.';
         setErrorMessage(errorMsg);
       });
   };
@@ -143,9 +154,10 @@ const Confirmation = () => {
         </div>
       )}
 
-      {reservationStatus === 'loading' && <p>Creando reserva...</p>}
-      {reservationStatus === 'succeeded' && (
-        <p>¡Reserva creada exitosamente!</p>
+      {successMessage && (
+        <div className="success-message">
+          {successMessage}
+        </div>
       )}
     </div>
   );

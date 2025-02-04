@@ -5,6 +5,7 @@ import { Aula } from './entities/aula.entity';
 import { Variable } from './entities/variable.entity';
 import { AulaVariable } from './entities/aula-variable.entity';
 import { CreateAulaDto } from './dto/CreateAulaDto.dto';
+import { CreateVariableDto } from './dto/create-variable.dto';
 
 @Injectable()
 export class AulasService {
@@ -35,8 +36,11 @@ export class AulasService {
   
 
   // CRUD para Variable
-  async createVariable(name: string): Promise<Variable> {
-    const variable = this.variableRepository.create({ name });
+  async createVariable(createVariableDto: CreateVariableDto): Promise<Variable> {
+    const variable = this.variableRepository.create({
+      name: createVariableDto.name,
+      quantity: createVariableDto.quantity
+    });
     return await this.variableRepository.save(variable);
   }
 

@@ -28,11 +28,36 @@ const typeorm_2 = require("typeorm");
 const booking_entity_1 = require("./entity/booking.entity");
 const aula_entity_1 = require("../aula/entities/aula.entity");
 const user_entity_1 = require("../user/entity/user.entity");
+const variable_entity_1 = require("../aula/entities/variable.entity");
 let BookingService = class BookingService {
-    constructor(bookingRepository, aulaRepository, userRepository) {
+    constructor(bookingRepository, variableRepository, aulaRepository, userRepository) {
         this.bookingRepository = bookingRepository;
+        this.variableRepository = variableRepository;
         this.aulaRepository = aulaRepository;
         this.userRepository = userRepository;
+    }
+    validateVariableAvailability(selectedVariables, reservationDays, reservationHours) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const variables = yield this.variableRepository.findByIds(selectedVariables);
+            for (const variable of variables) {
+                const bookingsWithVariable = yield this.bookingRepository
+                    .createQueryBuilder('booking')
+                    .where(':variableId = ANY(booking.selectedVariables)', {
+                    variableId: variable.id
+                })
+                    .andWhere('booking.reservationDays && ARRAY[:...reservationDays]::text[]', {
+                    reservationDays
+                })
+                    .andWhere('booking.reservationHours && ARRAY[:...reservationHours]::text[]', {
+                    reservationHours
+                })
+                    .getCount();
+                if (bookingsWithVariable >= variable.quantity) {
+                    throw new common_1.BadRequestException(`No hay suficientes unidades de ${variable.name} disponibles para el horario seleccionado. 
+           Cantidad disponible: ${variable.quantity}, Cantidad en uso: ${bookingsWithVariable}`);
+                }
+            }
+        });
     }
     // Crear una nueva reserva
     createBooking(createBookingDto, user) {
@@ -45,7 +70,7 @@ let BookingService = class BookingService {
             if (!aula) {
                 throw new common_1.NotFoundException(`Aula con ID ${createBookingDto.aulaId} no encontrada`);
             }
-            // Convertir las fechas al formato correcto
+            // Convertir las fechas al formato correcto 
             const formattedReservationDays = createBookingDto.reservationDays.map(date => {
                 const parsedDate = new Date(date);
                 return parsedDate.toISOString().split('T')[0]; // Convierte a formato YYYY-MM-DD
@@ -66,6 +91,8 @@ let BookingService = class BookingService {
             if (overlappingBooking) {
                 throw new common_1.BadRequestException('Este horario ya está reservado para el aula seleccionada en las fechas indicadas');
             }
+            // Validar disponibilidad de variables
+            yield this.validateVariableAvailability(createBookingDto.selectedVariables, formattedReservationDays, createBookingDto.reservationHours);
             const booking = this.bookingRepository.create(Object.assign(Object.assign({}, createBookingDto), { user: bookingUser, aula }));
             return yield this.bookingRepository.save(booking);
         });
@@ -164,9 +191,11 @@ exports.BookingService = BookingService;
 exports.BookingService = BookingService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(booking_entity_1.Booking)),
-    __param(1, (0, typeorm_1.InjectRepository)(aula_entity_1.Aula)),
-    __param(2, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
+    __param(1, (0, typeorm_1.InjectRepository)(variable_entity_1.Variable)),
+    __param(2, (0, typeorm_1.InjectRepository)(aula_entity_1.Aula)),
+    __param(3, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository])
 ], BookingService);

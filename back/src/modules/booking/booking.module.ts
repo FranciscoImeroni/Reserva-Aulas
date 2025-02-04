@@ -8,9 +8,14 @@ import { Aula } from '../aula/entities/aula.entity';
 import { User } from '../user/entity/user.entity';
 import { AuthModule } from '../auth/auth.module';
 import { UsersModule } from '../user/users.module';
+import { Variable } from '../aula/entities/variable.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Booking, Aula, User]), AuthModule, UsersModule],
+  imports: [
+    TypeOrmModule.forFeature([Booking, User, Aula, Variable]),
+    AuthModule,
+    UsersModule,
+  ],
   providers: [BookingService],
   controllers: [BookingController],
 })

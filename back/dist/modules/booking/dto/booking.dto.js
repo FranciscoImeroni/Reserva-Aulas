@@ -35,13 +35,13 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsArray)(),
     (0, class_transformer_1.Transform)(({ value }) => {
-        if (Array.isArray(value)) {
-            return value.map(date => {
-                const parsedDate = new Date(date);
-                return parsedDate.toISOString().split('T')[0];
-            });
-        }
-        return value;
+        if (!Array.isArray(value))
+            return value;
+        return value.map(date => {
+            if (!date)
+                return null;
+            return date.split('T')[0]; // Simplemente removemos la parte del tiempo si existe
+        }).filter(date => date !== null);
     }),
     (0, class_validator_1.Matches)(/^\d{4}-\d{2}-\d{2}$/, { each: true, message: 'Las fechas deben estar en formato YYYY-MM-DD' }),
     __metadata("design:type", Array)

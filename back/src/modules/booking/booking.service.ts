@@ -5,43 +5,76 @@ import { Booking } from './entity/booking.entity';
 import { CreateBookingDto } from './dto/booking.dto';
 import { Aula } from '../aula/entities/aula.entity';
 import { User } from '../user/entity/user.entity';
+import { Variable } from '../aula/entities/variable.entity';
 
 @Injectable()
 export class BookingService {
   constructor(
     @InjectRepository(Booking)
     private bookingRepository: Repository<Booking>,
+    @InjectRepository(Variable)
+    private variableRepository: Repository<Variable>,
     @InjectRepository(Aula)
     private aulaRepository: Repository<Aula>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
   ) {}
 
+  async validateVariableAvailability(
+    selectedVariables: string[],
+    reservationDays: string[],
+    reservationHours: string[],
+  ): Promise<void> {
+    const variables = await this.variableRepository.findByIds(selectedVariables);
+
+    for (const variable of variables) {
+      const bookingsWithVariable = await this.bookingRepository
+        .createQueryBuilder('booking')
+        .where(':variableId = ANY(booking.selectedVariables)', { 
+          variableId: variable.id 
+        })
+        .andWhere('booking.reservationDays && ARRAY[:...reservationDays]::text[]', { 
+          reservationDays 
+        })
+        .andWhere('booking.reservationHours && ARRAY[:...reservationHours]::text[]', { 
+          reservationHours 
+        })
+        .getCount();
+
+      if (bookingsWithVariable >= variable.quantity) {
+        throw new BadRequestException(
+          `No hay suficientes unidades de ${variable.name} disponibles para el horario seleccionado. 
+           Cantidad disponible: ${variable.quantity}, Cantidad en uso: ${bookingsWithVariable}`
+        );
+      }
+    }
+  }
+
   // Crear una nueva reserva
-  async createBooking(createBookingDto: CreateBookingDto, user: User): Promise<Booking> {
-    const bookingUser = await this.userRepository.findOne({ where: { id: createBookingDto.userId } });
-    if (!bookingUser) {
-      throw new NotFoundException('Usuario no encontrado');
-    }
-
-    const aula = await this.aulaRepository.findOne({ where: { id: createBookingDto.aulaId } });
-    if (!aula) {
-      throw new NotFoundException(`Aula con ID ${createBookingDto.aulaId} no encontrada`);
-    }
-
-    // Convertir las fechas al formato correcto
-    const formattedReservationDays = createBookingDto.reservationDays.map(date => {
-      const parsedDate = new Date(date);
-      return parsedDate.toISOString().split('T')[0]; // Convierte a formato YYYY-MM-DD
-    });
-
-    // Verificar que la fecha de reserva sea futura
-    const bookingDate = new Date(formattedReservationDays[0]);
-    const now = new Date();
-
-    if (bookingDate < now) {
-      throw new BadRequestException('No se pueden crear reservas para fechas pasadas');
-    }
+    async createBooking(createBookingDto: CreateBookingDto, user: User): Promise<Booking> {
+      const bookingUser = await this.userRepository.findOne({ where: { id: createBookingDto.userId } });
+      if (!bookingUser) {
+        throw new NotFoundException('Usuario no encontrado');
+      }
+  
+      const aula = await this.aulaRepository.findOne({ where: { id: createBookingDto.aulaId } });
+      if (!aula) {
+        throw new NotFoundException(`Aula con ID ${createBookingDto.aulaId} no encontrada`);
+      }
+  
+      // Convertir las fechas al formato correcto 
+      const formattedReservationDays = createBookingDto.reservationDays.map(date => {
+        const parsedDate = new Date(date);
+        return parsedDate.toISOString().split('T')[0]; // Convierte a formato YYYY-MM-DD
+      });
+  
+      // Verificar que la fecha de reserva sea futura
+      const bookingDate = new Date(formattedReservationDays[0]);
+      const now = new Date();
+  
+      if (bookingDate < now) {
+        throw new BadRequestException('No se pueden crear reservas para fechas pasadas');
+      }
 
     // Verificar si existe una reserva que se solape para la misma aula, día y horario
     const overlappingBooking = await this.bookingRepository
@@ -54,6 +87,13 @@ export class BookingService {
     if (overlappingBooking) {
       throw new BadRequestException('Este horario ya está reservado para el aula seleccionada en las fechas indicadas');
     }
+
+    // Validar disponibilidad de variables
+    await this.validateVariableAvailability(
+      createBookingDto.selectedVariables,
+      formattedReservationDays,
+      createBookingDto.reservationHours
+    );
 
     const booking = this.bookingRepository.create({
       ...createBookingDto,

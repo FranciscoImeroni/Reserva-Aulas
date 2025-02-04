@@ -54,9 +54,12 @@ let AulasService = class AulasService {
         });
     }
     // CRUD para Variable
-    createVariable(name) {
+    createVariable(createVariableDto) {
         return __awaiter(this, void 0, void 0, function* () {
-            const variable = this.variableRepository.create({ name });
+            const variable = this.variableRepository.create({
+                name: createVariableDto.name,
+                quantity: createVariableDto.quantity
+            });
             return yield this.variableRepository.save(variable);
         });
     }

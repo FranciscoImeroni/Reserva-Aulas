@@ -1,5 +1,6 @@
 // dto/booking.dto.ts
 import { IsUUID, IsString, IsArray, IsOptional, IsDateString, Matches } from 'class-validator';
+import { BadRequestException } from '@nestjs/common';
 import { Transform } from 'class-transformer';
 
 export class CreateBookingDto {
@@ -17,13 +18,11 @@ export class CreateBookingDto {
 
   @IsArray()
   @Transform(({ value }) => {
-    if (Array.isArray(value)) {
-      return value.map(date => {
-        const parsedDate = new Date(date);
-        return parsedDate.toISOString().split('T')[0];
-      });
-    }
-    return value;
+    if (!Array.isArray(value)) return value;
+    return value.map(date => {
+      if (!date) return null;
+      return date.split('T')[0]; // Simplemente removemos la parte del tiempo si existe
+    }).filter(date => date !== null);
   })
   @Matches(/^\d{4}-\d{2}-\d{2}$/, { each: true, message: 'Las fechas deben estar en formato YYYY-MM-DD' })
   reservationDays: string[];

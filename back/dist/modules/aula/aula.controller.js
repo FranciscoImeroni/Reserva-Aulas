@@ -25,6 +25,7 @@ exports.AulasController = void 0;
 const common_1 = require("@nestjs/common");
 const aula_service_1 = require("./aula.service");
 const CreateAulaDto_dto_1 = require("./dto/CreateAulaDto.dto");
+const create_variable_dto_1 = require("./dto/create-variable.dto");
 let AulasController = class AulasController {
     constructor(aulasService) {
         this.aulasService = aulasService;
@@ -53,9 +54,16 @@ let AulasController = class AulasController {
             return yield this.aulasService.assignVariableToAula(aulaId, variableId, valor);
         });
     }
-    createVariable(name) {
+    /*
+      @Post('createVariable')
+      async createVariable(
+        @Body('name') name: string,
+      ): Promise<Variable> {
+        return this.aulasService.createVariable(name);
+      } */
+    createVariable(createVariableDto) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.aulasService.createVariable(name);
+            return this.aulasService.createVariable(createVariableDto);
         });
     }
     getVariablesByAulaId(aulaId) {
@@ -110,10 +118,10 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AulasController.prototype, "assignVariableToAula", null);
 __decorate([
-    (0, common_1.Post)('createVariable'),
-    __param(0, (0, common_1.Body)('name')),
+    (0, common_1.Post)('variables'),
+    __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [create_variable_dto_1.CreateVariableDto]),
     __metadata("design:returntype", Promise)
 ], AulasController.prototype, "createVariable", null);
 __decorate([

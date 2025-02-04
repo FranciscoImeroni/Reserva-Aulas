@@ -1,18 +1,4 @@
 "use strict";
-/* import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-
-@Entity()
-export class Variable {
-@PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @Column()
-  name: string;
-
-  @Column({ default: false })
-  esOpcional: boolean;  // Si la variable debe tener una opción de activación/desactivación
-}
- */
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -37,6 +23,10 @@ __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], Variable.prototype, "name", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: 1 }),
+    __metadata("design:type", Number)
+], Variable.prototype, "quantity", void 0);
 __decorate([
     (0, typeorm_1.ManyToMany)(() => aula_entity_1.Aula, (aula) => aula.variables),
     __metadata("design:type", Array)

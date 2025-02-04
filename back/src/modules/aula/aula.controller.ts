@@ -3,6 +3,7 @@ import { AulasService } from './aula.service';
 import { Aula } from './entities/aula.entity';
 import { CreateAulaDto } from './dto/CreateAulaDto.dto';
 import { Variable } from './entities/variable.entity';
+import { CreateVariableDto } from './dto/create-variable.dto';
 
 @Controller('aulas')
 export class AulasController {
@@ -36,12 +37,17 @@ export class AulasController {
   ) {
     return await this.aulasService.assignVariableToAula(aulaId, variableId, valor);
   }
-
+/* 
   @Post('createVariable')
   async createVariable(
     @Body('name') name: string,
   ): Promise<Variable> {
     return this.aulasService.createVariable(name);
+  } */
+
+  @Post('variables')
+  async createVariable(@Body() createVariableDto: CreateVariableDto) {
+    return this.aulasService.createVariable(createVariableDto);
   }
 
   @Get(':aulaId/variables')
