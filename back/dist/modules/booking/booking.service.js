@@ -186,6 +186,32 @@ let BookingService = class BookingService {
                 throw new common_1.NotFoundException(`Booking with ID ${id} not found`);
         });
     }
+    getBookingsForDay(aulaId, fecha) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!fecha) {
+                throw new Error('Fecha is required');
+            }
+            const [year, month, day] = fecha.split('-');
+            if (!day || !month || !year) {
+                console.error('Invalid fecha format:', fecha);
+                throw new Error('Invalid fecha format');
+            }
+            const formattedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+            const bookings = yield this.bookingRepository
+                .createQueryBuilder('booking')
+                .leftJoinAndSelect('booking.user', 'user')
+                .leftJoinAndSelect('booking.aula', 'aula')
+                .where('aula.id = :aulaId', { aulaId })
+                .andWhere(':fecha = ANY(booking.reservationDays)', { fecha: formattedDate })
+                .getMany();
+            console.log('Bookings found:', bookings); // Para debugging
+            const reservedSlots = bookings.reduce((slots, booking) => {
+                return [...slots, ...booking.reservationHours];
+            }, []);
+            console.log('Reserved slots:', reservedSlots); // Para debugging
+            return { reservedSlots };
+        });
+    }
 };
 exports.BookingService = BookingService;
 exports.BookingService = BookingService = __decorate([

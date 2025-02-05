@@ -197,4 +197,36 @@ export class BookingService {
     const result = await this.bookingRepository.delete(id);
     if (result.affected === 0) throw new NotFoundException(`Booking with ID ${id} not found`);
   }
+
+  async getBookingsForDay(aulaId: string, fecha: string): Promise<{ reservedSlots: string[] }> {
+    if (!fecha) {
+      throw new Error('Fecha is required');
+    }
+
+    const [year, month, day] = fecha.split('-');
+    if (!day || !month || !year) {
+      console.error('Invalid fecha format:', fecha);
+      throw new Error('Invalid fecha format');
+    }
+
+    const formattedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+
+    const bookings = await this.bookingRepository
+      .createQueryBuilder('booking')
+      .leftJoinAndSelect('booking.user', 'user')
+      .leftJoinAndSelect('booking.aula', 'aula')
+      .where('aula.id = :aulaId', { aulaId })
+      .andWhere(':fecha = ANY(booking.reservationDays)', { fecha: formattedDate })
+      .getMany();
+
+    console.log('Bookings found:', bookings); // Para debugging
+
+    const reservedSlots = bookings.reduce<string[]>((slots, booking) => {
+      return [...slots, ...booking.reservationHours];
+    }, []);
+
+    console.log('Reserved slots:', reservedSlots); // Para debugging
+
+    return { reservedSlots };
+  }
 }

@@ -15,6 +15,7 @@ const Reserva1 = () => {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
   const [selectedDays, setSelectedDays] = useState([]);
+  const [showError, setShowError] = useState(false);
 
   const generateDays = (month, year) => {
     const daysInMonth = new Date(year, month + 1, 0).getDate(); 
@@ -43,6 +44,11 @@ const Reserva1 = () => {
   };
 
   const handleContinue = () => {
+    if (selectedDays.length === 0) {
+      setShowError(true);
+      return;
+    }
+    setShowError(false);
     dispatch(setReservationDays(selectedDays));
     navigate(`/Reserva2/${aulaId}`);
   };
@@ -79,6 +85,10 @@ const Reserva1 = () => {
             </div>
           );
         })}
+      </div>
+
+      <div className={`error-message1 ${showError ? 'visible' : ''}`}>
+        Por favor, selecciona al menos un día para continuar.
       </div>
 
       <div className="navigation-buttons">

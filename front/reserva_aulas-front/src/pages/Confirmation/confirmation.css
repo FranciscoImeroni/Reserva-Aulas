@@ -56,6 +56,10 @@
   max-width: 500px;
   text-align: center;
 }
+
+.error-message.visible {
+  opacity: 1;
+}
   
 .success-message {
   background-color: #e8f5e9;

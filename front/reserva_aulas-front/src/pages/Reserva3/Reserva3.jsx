@@ -10,9 +10,13 @@ const Reserva3 = () => {
   const dispatch = useDispatch();
   const activityName = useSelector((state) => state.reservation.activityName);
   const selectedVariables = useSelector((state) => state.reservation.selectedVariables); // Acceder al estado de las variables seleccionadas
+  const selectedDays = useSelector((state) => state.reservation.reservationDays);
+  const selectedHours = useSelector((state) => state.reservation.reservationHours);
 
   const [variables, setVariables] = useState([]); 
   const [selectedOptions, setSelectedOptions] = useState({}); 
+  const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     const fetchAulaName = async () => {
@@ -59,14 +63,29 @@ const Reserva3 = () => {
   };
 
   const handleContinue = () => {
-    const selectedVariableIds = Object.keys(selectedOptions).filter(
-      (key) => selectedOptions[key] === 'tick'
-    );
-  
-    dispatch(setSelectedVariables(selectedVariableIds)); // Guardar las variables seleccionadas en Redux
-  
-    console.log('Selected Variables in Redux:', selectedVariables); // Verificar que las variables estén guardadas en Redux
+    const missingFields = [];
 
+    if (!activityName.trim()) {
+      missingFields.push('nombre de la actividad');
+    }
+
+    if (!selectedDays || selectedDays.length === 0) {
+      missingFields.push('días');
+    }
+
+    if (!selectedHours || selectedHours.length === 0) {
+      missingFields.push('horarios');
+    }
+
+    if (missingFields.length > 0) {
+      setErrorMessage(`Por favor, completa los siguientes campos: ${missingFields.join(', ')}.`);
+      setShowError(true);
+      return;
+    }
+
+    setShowError(false);
+    setErrorMessage('');
+    dispatch(setActivityName(activityName));
     navigate(`/ReservaConfirmacion/${aulaId}`);
   };
   
@@ -111,6 +130,12 @@ const Reserva3 = () => {
           </div>
         ))}
       </div>
+
+      {showError && (
+        <div className="error-message3 visible">
+          {errorMessage}
+        </div>
+      )}
 
       <div className="navigation-buttons">
         <button onClick={handleBack} className="nav-btn back-btn">

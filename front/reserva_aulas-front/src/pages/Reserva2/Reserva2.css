@@ -88,3 +88,21 @@
     background-color: #38913c;
     color: white;
   }
+
+  .time-slot-btn.disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .error-message2 {
+    color: #d32f2f;
+    margin-top: 1rem;
+    font-weight: bold;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .error-message2.visible {
+    opacity: 1;
+  }

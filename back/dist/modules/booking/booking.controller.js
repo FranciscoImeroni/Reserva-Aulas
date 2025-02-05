@@ -57,13 +57,11 @@ let BookingController = class BookingController {
             return this.bookingService.getBookingsByUserId(userId);
         });
     }
-    /*   @Get('reservas/:aulaId/:fecha')
-    async getBookingsForDay(
-      @Param('aulaId') aulaId: string,
-      @Param('fecha') fecha: string,
-    ): Promise<Booking[]> {
-      return this.bookingService.getBookingsForDay(aulaId, fecha);
-    } */
+    getBookingsForDay(aulaId, fecha) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.bookingService.getBookingsForDay(aulaId, fecha);
+        });
+    }
     /*   @Put(':id')
       async updateBooking(@Param('id') id: string, @Body() createBookingDto: CreateBookingDto) {
         return this.bookingService.updateBooking(id, createBookingDto);
@@ -98,6 +96,14 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], BookingController.prototype, "getBookingsByUserId", null);
+__decorate([
+    (0, common_1.Get)('reservas/:aulaId'),
+    __param(0, (0, common_1.Param)('aulaId')),
+    __param(1, (0, common_1.Query)('fecha')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], BookingController.prototype, "getBookingsForDay", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id')),

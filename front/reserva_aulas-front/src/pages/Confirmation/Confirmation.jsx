@@ -12,6 +12,8 @@ const Confirmation = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { aulaId } = useParams();
+  const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const {
     activityName,
@@ -24,7 +26,6 @@ const Confirmation = () => {
   const reservationStatus = useSelector((state) => state.reservation.status);
   const [selectedVariableNames, setSelectedVariableNames] = useState([]);
   const [userId, setUserId] = useState(null);
-  const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
 
   useEffect(() => {
@@ -58,12 +59,30 @@ const Confirmation = () => {
 
 
   const handleConfirmReservation = () => {
-    if (!userId) {
-      console.error('User ID is missing.');
-      return; 
+    // Validar todos los campos requeridos
+    const missingFields = [];
+
+    if (!activityName?.trim()) {
+      missingFields.push('nombre de la actividad');
     }
-  
-    // Ensure the dates are in a valid format
+    if (!reservationDays?.length) {
+      missingFields.push('días');
+    }
+    if (!reservationHours?.length) {
+      missingFields.push('horarios');
+    }
+    if (!aulaName) {
+      missingFields.push('aula');
+    }
+
+    if (missingFields.length > 0) {
+      setErrorMessage(`No se puede crear la reserva. Faltan campos obligatorios: ${missingFields.join(', ')}.`);
+      setShowError(true);
+      return;
+    }
+
+    // Si todo está validado, proceder con la reserva
+    setShowError(false);
     const formattedDays = reservationDays.map(date => {
       try {
         const [day, month, year] = date.split('/');
@@ -74,7 +93,7 @@ const Confirmation = () => {
         return null;
       }
     }).filter(date => date !== null);
-  
+
     const newReservation = {
       aulaName,
       activityName,
@@ -84,11 +103,10 @@ const Confirmation = () => {
       userId,
       aulaId,
     };
-  
+
     dispatch(createReservation(newReservation))
       .unwrap()
       .then((response) => {
-        console.log('Reserva creada exitosamente', response);
         setSuccessMessage('¡Reserva creada exitosamente!');
         setTimeout(() => {
           navigate('/Home');
@@ -98,6 +116,7 @@ const Confirmation = () => {
         console.error('Error al crear la reserva:', error);
         const errorMsg = error.message || 'Error al crear la reserva. Por favor, inténtalo de nuevo.';
         setErrorMessage(errorMsg);
+        setShowError(true);
       });
   };
   
@@ -134,22 +153,8 @@ const Confirmation = () => {
         </p>
       </div>
 
-      <div className='buttons'>
-        <button onClick={handleBack} className="nav-btn back-btn">
-          Atrás
-        </button>
-
-        <button 
-          onClick={handleConfirmReservation} 
-          className='confirm-button'
-          disabled={reservationStatus === 'loading'} 
-        >
-          {reservationStatus === 'loading' ? 'Creando reserva...' : 'Confirmar Reserva'}
-        </button>
-      </div>
-
-      {errorMessage && (
-        <div className="error-message">
+      {showError && (
+        <div className="error-message visible">
           {errorMessage}
         </div>
       )}
@@ -159,6 +164,19 @@ const Confirmation = () => {
           {successMessage}
         </div>
       )}
+
+      <div className='buttons'>
+        <button onClick={handleBack} className="nav-btn back-btn">
+          Atrás
+        </button>
+        <button 
+          onClick={handleConfirmReservation} 
+          className='confirm-button'
+          disabled={reservationStatus === 'loading'} 
+        >
+          {reservationStatus === 'loading' ? 'Creando reserva...' : 'Confirmar Reserva'}
+        </button>
+      </div>
     </div>
   );
 };

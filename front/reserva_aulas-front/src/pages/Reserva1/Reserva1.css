@@ -78,3 +78,15 @@
   background-color: black; 
   color: white; 
 }
+
+.error-message1 {
+  color: #d32f2f;
+  margin-top: 1rem;
+  font-weight: bold;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.error-message1.visible {
+  opacity: 1;
+}

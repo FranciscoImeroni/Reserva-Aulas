@@ -1,5 +1,5 @@
 // booking.controller.ts
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, ParseUUIDPipe, Query } from '@nestjs/common';
 import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dto/booking.dto';
 //import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';  // Ajusta la ruta según tu estructura de directorios
@@ -10,8 +10,7 @@ import { Roles } from '../../Decorators/roles.decorators';
 import { Role } from '../user/dto/roles.enum';
 import { RolesGuard } from '../auth/guard/jwt-auth.guard';
 import { Booking } from './entity/booking.entity';
-
-
+import { NotFoundException } from '@nestjs/common';
 
 @Controller('bookings')
 @UseGuards(RolesGuard)
@@ -46,14 +45,13 @@ export class BookingController {
     return this.bookingService.getBookingsByUserId(userId);
   }
 
-/*   @Get('reservas/:aulaId/:fecha')
-async getBookingsForDay(
-  @Param('aulaId') aulaId: string,
-  @Param('fecha') fecha: string,
-): Promise<Booking[]> {
-  return this.bookingService.getBookingsForDay(aulaId, fecha);
-} */
-
+  @Get('reservas/:aulaId')
+  async getBookingsForDay(
+    @Param('aulaId') aulaId: string,
+    @Query('fecha') fecha: string,
+  ): Promise<{ reservedSlots: string[] }> {
+    return this.bookingService.getBookingsForDay(aulaId, fecha);
+  }
 
 /*   @Put(':id')
   async updateBooking(@Param('id') id: string, @Body() createBookingDto: CreateBookingDto) {
