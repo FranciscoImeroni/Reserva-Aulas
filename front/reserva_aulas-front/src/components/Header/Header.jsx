@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import jwt_decode from 'jwt-decode';
 import './Header.css';
 import Sidebar from '../sidebar/Sidebar';  // Importa el Sidebar
 
@@ -9,16 +8,17 @@ const Header = () => {
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);  // Estado para controlar el sidebar
 
-  const isAuthRoute = () => {
+  // Mover isAuthRoute a useCallback para memoizar la función
+  const isAuthRoute = useCallback(() => {
     return location.pathname === '/' || location.pathname === '/register';
-  };
+  }, [location.pathname]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token && !isAuthRoute()) {
       navigate('/');
     }
-  }, [navigate, location]);
+  }, [navigate, location, isAuthRoute]);
 
   // Función para alternar el estado del sidebar
   const toggleSidebar = () => {

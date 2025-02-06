@@ -9,7 +9,6 @@ const Reserva3 = () => {
   const navigate = useNavigate(); 
   const dispatch = useDispatch();
   const activityName = useSelector((state) => state.reservation.activityName);
-  const selectedVariables = useSelector((state) => state.reservation.selectedVariables); // Acceder al estado de las variables seleccionadas
   const selectedDays = useSelector((state) => state.reservation.reservationDays);
   const selectedHours = useSelector((state) => state.reservation.reservationHours);
 
@@ -17,6 +16,33 @@ const Reserva3 = () => {
   const [selectedOptions, setSelectedOptions] = useState({}); 
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    // Limpiar las variables seleccionadas al montar el componente
+    dispatch(setSelectedVariables([]));
+  }, [dispatch]);
+
+  useEffect(() => {
+    const fetchVariables = async () => {
+      try {
+        const DOMAIN_BACK = process.env.REACT_APP_DOMAIN_BACK;
+        const response = await fetch(`${DOMAIN_BACK}/aulas/variables`);
+        const data = await response.json();
+        setVariables(data);
+        
+        // Inicializar todas las variables como deseleccionadas
+        const initialOptions = data.reduce((acc, variable) => {
+          acc[variable.id] = 'cross';
+          return acc;
+        }, {});
+        setSelectedOptions(initialOptions);
+      } catch (error) {
+        console.error('Error al obtener las variables:', error);
+      }
+    };
+
+    fetchVariables();
+  }, []);
 
   useEffect(() => {
     const fetchAulaName = async () => {
@@ -32,30 +58,27 @@ const Reserva3 = () => {
     fetchAulaName();
   }, [aulaId, dispatch]);
 
-  useEffect(() => {
-    const fetchVariables = async () => {
-      try {
-        const DOMAIN_BACK = process.env.REACT_APP_DOMAIN_BACK;
-        const response = await fetch(`${DOMAIN_BACK}/aulas/variables`);
-        const data = await response.json();
-        setVariables(data);
-      } catch (error) {
-        console.error('Error al obtener las variables:', error);
-      }
-    };
-
-    fetchVariables();
-  }, [aulaId]);
-
   const handleChange = (e) => {
     dispatch(setActivityName(e.target.value));
   };
 
   const handleOptionClick = (variableId, option) => {
-    setSelectedOptions((prevState) => ({
-      ...prevState,
-      [variableId]: option,
-    }));
+    setSelectedOptions((prevState) => {
+      const newState = {
+        ...prevState,
+        [variableId]: option,
+      };
+      
+      // Crear array de variables seleccionadas (solo las que tienen tick)
+      const selectedVars = Object.entries(newState)
+        .filter(([_, value]) => value === 'tick')
+        .map(([key]) => key);
+      
+      // Actualizar Redux store
+      dispatch(setSelectedVariables(selectedVars));
+      
+      return newState;
+    });
   };
 
   const handleBack = () => {
