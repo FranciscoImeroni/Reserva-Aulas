@@ -64,7 +64,7 @@ let UsersService = class UsersService {
             }
             const isPasswordValid = yield bcrypt.compare(password, user.password);
             if (!isPasswordValid) {
-                return null;
+                throw new common_1.UnauthorizedException('Contraseña incorrecta');
             }
             return user;
         });

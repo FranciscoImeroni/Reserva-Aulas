@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, ForbiddenException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Like, Repository, In } from 'typeorm';
 import { Booking } from './entity/booking.entity';
@@ -59,7 +59,7 @@ export class BookingService {
   
       const aula = await this.aulaRepository.findOne({ where: { id: createBookingDto.aulaId } });
       if (!aula) {
-        throw new NotFoundException(`Aula con ID ${createBookingDto.aulaId} no encontrada`);
+        throw new NotFoundException('Aula no encontrada');
       }
   
       // Convertir las fechas al formato correcto 
@@ -85,7 +85,7 @@ export class BookingService {
       .getOne();
 
     if (overlappingBooking) {
-      throw new BadRequestException('Este horario ya está reservado para el aula seleccionada en las fechas indicadas');
+      throw new ConflictException('Ya existe una reserva para esta aula en el horario seleccionado');
     }
 
     // Validar disponibilidad de variables

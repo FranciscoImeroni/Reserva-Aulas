@@ -68,7 +68,7 @@ let BookingService = class BookingService {
             }
             const aula = yield this.aulaRepository.findOne({ where: { id: createBookingDto.aulaId } });
             if (!aula) {
-                throw new common_1.NotFoundException(`Aula con ID ${createBookingDto.aulaId} no encontrada`);
+                throw new common_1.NotFoundException('Aula no encontrada');
             }
             // Convertir las fechas al formato correcto 
             const formattedReservationDays = createBookingDto.reservationDays.map(date => {
@@ -89,7 +89,7 @@ let BookingService = class BookingService {
                 .andWhere('booking.reservationHours && ARRAY[:...reservationHours]', { reservationHours: createBookingDto.reservationHours })
                 .getOne();
             if (overlappingBooking) {
-                throw new common_1.BadRequestException('Este horario ya está reservado para el aula seleccionada en las fechas indicadas');
+                throw new common_1.ConflictException('Ya existe una reserva para esta aula en el horario seleccionado');
             }
             // Validar disponibilidad de variables
             yield this.validateVariableAvailability(createBookingDto.selectedVariables, formattedReservationDays, createBookingDto.reservationHours);

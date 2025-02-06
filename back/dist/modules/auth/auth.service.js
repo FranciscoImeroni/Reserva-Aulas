@@ -60,7 +60,7 @@ let AuthService = class AuthService {
         return __awaiter(this, void 0, void 0, function* () {
             const existingUser = yield this.usersService.findByEmail(createUserDto.email);
             if (existingUser) {
-                throw new common_1.UnauthorizedException('User already exists with this email');
+                throw new common_1.UnauthorizedException('El usuario ya existe con este correo');
             }
             const verificationToken = crypto.randomBytes(32).toString('hex');
             const user = yield this.usersService.createUser(Object.assign(Object.assign({}, createUserDto), { role: 'Unverified', verificationToken }));
@@ -74,72 +74,40 @@ let AuthService = class AuthService {
         return __awaiter(this, void 0, void 0, function* () {
             const user = yield this.usersService.validateUser(email, password);
             if (!user) {
-                throw new common_1.UnauthorizedException('Invalid email or password');
+                throw new common_1.UnauthorizedException('Correo o contraseña inválidos');
             }
-            if (user.role !== 'User') {
-                throw new common_1.ForbiddenException('Access restricted to users with the "User" role');
+            if (user.role !== 'user' && user.role !== 'admin') {
+                throw new common_1.ForbiddenException('Acceso restringido a usuarios con rol "Usuario" o "Admin"');
             }
             const payload = { sub: user.id, role: user.role };
             const token = this.jwtService.sign(payload, { expiresIn: '14d' });
-            console.log('Token generado:', token);
+            // Establecer cookie httpOnly
             res.cookie('Authentication', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
-                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+                maxAge: 7 * 24 * 60 * 60 * 1000,
             });
-            res.cookie('userEmail', user.email, {
-                httpOnly: false,
-                secure: process.env.NODE_ENV === 'production',
-                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
-            });
+            /*     res.cookie('userEmail', user.email, {
+                  httpOnly: false,
+                  secure: process.env.NODE_ENV === 'production',
+                  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+                }); */
             res.cookie('userId', user.id, {
                 httpOnly: false,
                 secure: process.env.NODE_ENV === 'production',
                 maxAge: 7 * 24 * 60 * 60 * 1000,
             });
+            // Enviar token en el cuerpo de la respuesta también
             res.status(common_2.HttpStatus.OK).json({
-                message: 'Login successful - Token renewed',
-                user: { email: user.email },
+                message: 'Login successful',
+                token: token,
+                user: {
+                    email: user.email,
+                    role: user.role
+                }
             });
         });
     }
-    /*   async login(email: string, password: string, res: ExpressResponse): Promise<void> {
-        const user = await this.usersService.validateUser(email, password);
-        if (!user) {
-          throw new UnauthorizedException('Invalid email or password');
-        }
-      
-        // Genera el token JWT con el ID del usuario
-        const payload = { sub: user.id , role: user.role};
-        const token = this.jwtService.sign(payload, { expiresIn: '7d' });
-      
-        // Configura la cookie de autenticación (JWT)
-        res.cookie('Authentication', token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
-        });
-      
-        // Configura una cookie adicional para almacenar el email del usuario
-        res.cookie('userEmail', user.email, {
-          httpOnly: false, // Permite el acceso desde el cliente si es necesario
-          secure: process.env.NODE_ENV === 'production',
-          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
-        });
-    
-        res.cookie('userId', user.id, {
-          httpOnly: false, // Protege la cookie de ser accedida por JavaScript en el lado del cliente
-          secure: process.env.NODE_ENV === 'production', // Solo se enviará en entornos seguros (HTTPS)
-          maxAge: 7 * 24 * 60 * 60 * 1000, // La cookie estará disponible por 7 días
-        });
-        
-      
-        // Envía una respuesta con éxito
-        res.status(HttpStatus.OK).json({
-          message: 'Login successful',
-          user: { email: user.email },
-        });
-      } */
     // Cerrar sesión eliminando la cookie
     logout(res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -153,7 +121,7 @@ let AuthService = class AuthService {
             // Busca el usuario con el token de verificación
             const user = yield this.usersService.findByVerificationToken(verificationToken);
             if (!user) {
-                throw new common_1.NotFoundException('Token de verificación no válido o expirado');
+                throw new common_1.NotFoundException('Token inválido o expirado');
             }
             // Cambia el rol del usuario a "User" y elimina el token de verificación
             user.role = 'User';

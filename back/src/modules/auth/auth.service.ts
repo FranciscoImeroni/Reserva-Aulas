@@ -25,7 +25,7 @@ export class AuthService {
   async register(createUserDto: CreateUserDto): Promise<User> {
     const existingUser = await this.usersService.findByEmail(createUserDto.email);
     if (existingUser) {
-      throw new UnauthorizedException('User already exists with this email');
+      throw new UnauthorizedException('El usuario ya existe con este correo');
     }
   
     const verificationToken = crypto.randomBytes(32).toString('hex');
@@ -53,88 +53,45 @@ export class AuthService {
   async login(email: string, password: string, res: ExpressResponse): Promise<void> {
     const user = await this.usersService.validateUser(email, password);
     if (!user) {
-      throw new UnauthorizedException('Invalid email or password');
+      throw new UnauthorizedException('Correo o contraseña inválidos');
     }
 
-    if (user.role !== 'User') {
-      throw new ForbiddenException('Access restricted to users with the "User" role');
+    if (user.role !== 'user' && user.role !== 'admin') {
+      throw new ForbiddenException('Acceso restringido a usuarios con rol "Usuario" o "Admin"');
     }
   
     const payload = { sub: user.id, role: user.role };
     const token = this.jwtService.sign(payload, { expiresIn: '14d' });
 
-    console.log('Token generado:', token);
-
-    
-  
+    // Establecer cookie httpOnly
     res.cookie('Authentication', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', 
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     
-    res.cookie('userEmail', user.email, {
+/*     res.cookie('userEmail', user.email, {
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
-    });
+    }); */
     
     res.cookie('userId', user.id, {
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    
-    
   
-    res.status(HttpStatus.OK).json({
-      message: 'Login successful - Token renewed',
-      user: { email: user.email },
-    });
-  }
-  
-
-/*   async login(email: string, password: string, res: ExpressResponse): Promise<void> {
-    const user = await this.usersService.validateUser(email, password);
-    if (!user) {
-      throw new UnauthorizedException('Invalid email or password');
-    }
-  
-    // Genera el token JWT con el ID del usuario
-    const payload = { sub: user.id , role: user.role};
-    const token = this.jwtService.sign(payload, { expiresIn: '7d' });
-  
-    // Configura la cookie de autenticación (JWT)
-    res.cookie('Authentication', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
-    });
-  
-    // Configura una cookie adicional para almacenar el email del usuario
-    res.cookie('userEmail', user.email, {
-      httpOnly: false, // Permite el acceso desde el cliente si es necesario
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
-    });
-
-    res.cookie('userId', user.id, {
-      httpOnly: false, // Protege la cookie de ser accedida por JavaScript en el lado del cliente
-      secure: process.env.NODE_ENV === 'production', // Solo se enviará en entornos seguros (HTTPS)
-      maxAge: 7 * 24 * 60 * 60 * 1000, // La cookie estará disponible por 7 días
-    });
-    
-  
-    // Envía una respuesta con éxito
+    // Enviar token en el cuerpo de la respuesta también
     res.status(HttpStatus.OK).json({
       message: 'Login successful',
-      user: { email: user.email },
+      token: token,
+      user: { 
+        email: user.email,
+        role: user.role 
+      }
     });
-  } */
-
-  
-  
-
+  }
 
   // Cerrar sesión eliminando la cookie
   async logout(res: ExpressResponse): Promise<void> {
@@ -148,7 +105,7 @@ export class AuthService {
     const user = await this.usersService.findByVerificationToken(verificationToken);
   
     if (!user) {
-      throw new NotFoundException('Token de verificación no válido o expirado');
+      throw new NotFoundException('Token inválido o expirado');
     }
   
     // Cambia el rol del usuario a "User" y elimina el token de verificación

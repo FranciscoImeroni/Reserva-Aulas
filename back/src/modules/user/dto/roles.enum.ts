@@ -1,6 +1,6 @@
 export enum Role {
-    Unverified = 'Unverified',
-    User = 'User',
-    Admin = 'Admin',
+    Unverified = 'unverified',
+    User = 'user',
+    Admin = 'admin',
     Banned = 'banned'
 }

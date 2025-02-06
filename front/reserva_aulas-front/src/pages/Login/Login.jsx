@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 import './Login.css';
 
 
@@ -26,14 +27,15 @@ const Login = () => {
         { withCredentials: true }
       );
     
-      // Extraer user y token de la respuesta
-      const { token, user } = response.data;
+      // Extraer token de la respuesta
+      const { token } = response.data;
     
-      // Guardar en localStorage
+      // Guardar token en localStorage
       localStorage.setItem('token', token);
-      localStorage.setItem('userRole', user.role);
-      sessionStorage.setItem('userEmail', user.email);
     
+      // Decodificar el token para obtener el rol
+      const decodedToken = jwtDecode(token);
+      localStorage.setItem('userRole', decodedToken.role);
     
       navigate('/home');
     } catch (error) {

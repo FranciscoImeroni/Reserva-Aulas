@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entity/user.entity';
@@ -26,7 +26,7 @@ export class UsersService {
   
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) { 
-      return null; 
+      throw new UnauthorizedException('Contraseña incorrecta');
     }
   
     return user; 
