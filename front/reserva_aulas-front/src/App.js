@@ -101,6 +101,7 @@ import Login from './pages/Login/Login';
 import Logup from './pages/Logup/Logup';
 import { setUser } from './features/reservation/authSlice';
 import MisReservas from './pages/MisReservas/MisReservas';
+import AdminDashboard from './pages/admin-dashboard/admin-dashboard';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -126,6 +127,7 @@ const App = () => {
           <Route path="/reserva3/:aulaId" element={<Reserva3 />} />
           <Route path="/reservaConfirmacion/:aulaId" element={<ReservaConfirmacion />} />
           <Route path="/misReservas" element={<MisReservas />} />
+          <Route path="/admin-dashboard" element={<AdminDashboard />} />
         </Routes>
       </Layout>
     </Router>
