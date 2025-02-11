@@ -201,6 +201,8 @@ const AdminDashboard = () => {
         credentials: 'include'
       });
       const data = await response.json();
+      console.log("Datos recibidos:", data); // <-- Agrega esto
+
       setReservations(data);
     } catch (error) {
       console.error('Error fetching reservations:', error);
@@ -290,14 +292,19 @@ const AdminDashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {reservations.map(reservation => (
-                <tr key={reservation.id}>
-                  <td>{reservation.user.email}</td>
-                  <td>{reservation.aula.name}</td>
-                  <td>{new Date(reservation.date).toLocaleDateString()}</td>
-                  <td>{reservation.status}</td>
-                </tr>
-              ))}
+            {Array.isArray(reservations) && reservations.length > 0 ? (
+  reservations.map(reservation => (
+    <tr key={reservation.id}>
+      <td>{reservation.user.email}</td>
+      <td>{reservation.aula.name}</td>
+      <td>{new Date(reservation.date).toLocaleDateString()}</td>
+      <td>{reservation.status}</td>
+    </tr>
+  ))
+) : (
+  <tr><td colSpan="4">No hay reservas</td></tr>
+)}
+
             </tbody>
           </table>
         </div>

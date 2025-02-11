@@ -40,6 +40,7 @@ import { MailService } from '../mail/mail.service';
 //import { JwtStrategy } from './guard/jwt.strategy';
 import { UsersModule } from '../user/users.module';
 import { AuthController } from './auth.controller';
+import { JwtStrategy } from './jwt.strategy';
 
 @Module({
   controllers: [AuthController],
@@ -56,7 +57,7 @@ import { AuthController } from './auth.controller';
       }),
     }),
   ],
-  providers: [AuthService, MailService], // JwtStrategy
+  providers: [AuthService, MailService, JwtStrategy], // JwtStrategy
   exports: [AuthService, JwtModule], // Exportar AuthService si se usa en otros módulos
 })
 export class AuthModule {}

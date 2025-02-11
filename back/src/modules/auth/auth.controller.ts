@@ -6,6 +6,7 @@ import { User } from '../user/entity/user.entity';
 import { CurrentUser } from './current-user.decorator';
 import { Roles } from '../../Decorators/roles.decorators';
 import { Role } from '../user/dto/roles.enum';
+import { RolesGuard } from './guard/jwt-auth.guard';
 
 
 
@@ -32,10 +33,16 @@ export class AuthController {
     await this.authService.login(email, password, res);
   }
 
+  @UseGuards(RolesGuard)
   @Get('me')
-  async getMe(@CurrentUser() user: User): Promise<User> {
-    return user;
+  async getMe(@CurrentUser() user: User): Promise<any> {
+    console.log("Usuario obtenido:", user);
+    if (!user) {
+      return { message: "No authenticated user found", role: "Unknown" };
+    }
+    return { message: "User found", user };
   }
+  
 
   
   @Post('logout')

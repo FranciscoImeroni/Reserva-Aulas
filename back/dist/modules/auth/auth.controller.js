@@ -29,6 +29,7 @@ const user_entity_1 = require("../user/entity/user.entity");
 const current_user_decorator_1 = require("./current-user.decorator");
 const roles_decorators_1 = require("../../Decorators/roles.decorators");
 const roles_enum_1 = require("../user/dto/roles.enum");
+const jwt_auth_guard_1 = require("./guard/jwt-auth.guard");
 let AuthController = class AuthController {
     constructor(authService) {
         this.authService = authService;
@@ -47,7 +48,11 @@ let AuthController = class AuthController {
     }
     getMe(user) {
         return __awaiter(this, void 0, void 0, function* () {
-            return user;
+            console.log("Usuario obtenido:", user);
+            if (!user) {
+                return { message: "No authenticated user found", role: "Unknown" };
+            }
+            return { message: "User found", user };
         });
     }
     logout(res) {
@@ -93,6 +98,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
 __decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.RolesGuard),
     (0, common_1.Get)('me'),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),

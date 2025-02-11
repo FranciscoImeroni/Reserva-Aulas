@@ -47,6 +47,7 @@ const mail_service_1 = require("../mail/mail.service");
 //import { JwtStrategy } from './guard/jwt.strategy';
 const users_module_1 = require("../user/users.module");
 const auth_controller_1 = require("./auth.controller");
+const jwt_strategy_1 = require("./jwt.strategy");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -66,7 +67,7 @@ exports.AuthModule = AuthModule = __decorate([
                 }),
             }),
         ],
-        providers: [auth_service_1.AuthService, mail_service_1.MailService], // JwtStrategy
+        providers: [auth_service_1.AuthService, mail_service_1.MailService, jwt_strategy_1.JwtStrategy], // JwtStrategy
         exports: [auth_service_1.AuthService, jwt_1.JwtModule], // Exportar AuthService si se usa en otros módulos
     })
 ], AuthModule);

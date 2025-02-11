@@ -26,6 +26,7 @@ exports.BookingController = void 0;
 const common_1 = require("@nestjs/common");
 const booking_service_1 = require("./booking.service");
 const booking_dto_1 = require("./dto/booking.dto");
+const current_user_decorator_1 = require("../auth/current-user.decorator");
 const user_entity_1 = require("../user/entity/user.entity");
 const roles_decorators_1 = require("../../Decorators/roles.decorators");
 const roles_enum_1 = require("../user/dto/roles.enum");
@@ -78,6 +79,7 @@ __decorate([
     (0, common_1.Post)(),
     (0, roles_decorators_1.Roles)(roles_enum_1.Role.Admin, roles_enum_1.Role.User),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [booking_dto_1.CreateBookingDto, user_entity_1.User]),
     __metadata("design:returntype", void 0)

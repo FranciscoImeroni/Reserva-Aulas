@@ -19,7 +19,7 @@ export class BookingController {
 
   @Post()
   @Roles(Role.Admin, Role.User)
-  create(@Body() createBookingDto: CreateBookingDto, user: User) {
+  create(@Body() createBookingDto: CreateBookingDto, @CurrentUser() user: User)  {
     console.log('Datos recibidos en el DTO:', createBookingDto);
     console.log('Usuario autenticado:', user);
     return this.bookingService.createBooking(createBookingDto, user);

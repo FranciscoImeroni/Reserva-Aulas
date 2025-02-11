@@ -6,5 +6,5 @@ var Role;
     Role["Unverified"] = "unverified";
     Role["User"] = "user";
     Role["Admin"] = "admin";
-    Role["Banned"] = "banned";
+    Role["Suspended"] = "suspended";
 })(Role || (exports.Role = Role = {}));
