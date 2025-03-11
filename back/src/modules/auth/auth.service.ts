@@ -65,9 +65,7 @@ export class AuthService {
 
     // Establecer cookie httpOnly
     res.cookie('Authentication', token, {
-      httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     
 /*     res.cookie('userEmail', user.email, {
@@ -79,7 +77,6 @@ export class AuthService {
     res.cookie('userId', user.id, {
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
   
     // Enviar token en el cuerpo de la respuesta también
@@ -94,23 +91,34 @@ export class AuthService {
   }
 
   // Cerrar sesión eliminando la cookie
-  async logout(res: ExpressResponse): Promise<void> {
-    res.clearCookie('Authentication');
-    res.status(HttpStatus.OK).json({ message: 'Logout successful' });
-  }
+async logout(res: ExpressResponse): Promise<void> {
+  console.log('Logout initiated');
+  res.clearCookie('Authentication', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    path: '/'
+  });
+  res.clearCookie('userId', {
+    httpOnly: false,
+    secure: process.env.NODE_ENV === 'production',
+    path: '/'
+  });
+  
+  res.status(HttpStatus.OK).json({ 
+    message: 'Logout successful',
+    clearLocalStorage: ['token', 'userRole', 'userId', 'userEmail'] 
+  });
+}
 
-  // Verificación de correo electrónico
   async verifyEmail(verificationToken: string): Promise<User> {
-    // Busca el usuario con el token de verificación
     const user = await this.usersService.findByVerificationToken(verificationToken);
   
     if (!user) {
       throw new NotFoundException('Token inválido o expirado');
     }
   
-    // Cambia el rol del usuario a "User" y elimina el token de verificación
     user.role = 'User';
-    user.verificationToken = null; // Elimina el token de verificación
+    user.verificationToken = null; 
     await this.usersService.save(user);
     return user;
   }

@@ -28,7 +28,11 @@ const Header = () => {
   return (
     <header className="header">
       <div className="header-logo">
-        <Link to="/Home">HEPTA Aulas</Link>
+        {isAuthRoute() ? (
+          <span>HEPTA Aulas</span>
+        ) : (
+          <Link to="/Home">HEPTA Aulas</Link>
+        )}
       </div>
       {!isAuthRoute() && (
         <>

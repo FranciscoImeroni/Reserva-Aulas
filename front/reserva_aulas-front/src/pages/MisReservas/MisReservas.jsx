@@ -13,30 +13,37 @@ const MisReservas = () => {
       try {
         setLoading(true);
         setError(null);
-
+    
         const userId = Cookies.get('userId');
-        console.log('User ID from cookie:', userId); 
-
         if (!userId) {
           throw new Error('No se encontró el ID del usuario.');
         }
-
+    
         const DOMAIN_BACK = process.env.REACT_APP_DOMAIN_BACK;
-
-        const response = await fetch(
-          `${DOMAIN_BACK}/bookings/user/${userId}`
-        );
-
+    
+        const response = await fetch(`${DOMAIN_BACK}/bookings/user/${userId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Cookies.get('Authentication')}` 
+          }
+        });
+    
+        console.log('Response status:', response.status);
+    
         if (!response.ok) {
+          const errorText = await response.text(); // Solo leer el error si la respuesta no es OK
+          console.error('Error en la respuesta:', errorText);
           throw new Error('Error al obtener las reservas');
         }
-
+    
         const data = await response.json();
-
+        console.log('Data recibida:', data);
+    
         const reservasOrdenadas = data.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
-
+    
         setReservas(reservasOrdenadas);
       } catch (err) {
         console.error(err);
@@ -45,6 +52,7 @@ const MisReservas = () => {
         setLoading(false);
       }
     };
+    
 
     obtenerReservas();
   }, []);

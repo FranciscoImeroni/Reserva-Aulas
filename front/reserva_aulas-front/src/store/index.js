@@ -5,8 +5,8 @@ import authReducer from '../features/reservation/authSlice';
 
 export const store = configureStore({
   reducer: {
-    reservation: reservationReducer,
-    auth: authReducer, // Agregamos el reducer de auth
+    auth: authReducer, // El estado "auth" debe estar en el store
+    reservation: reservationReducer
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(thunk),
 });

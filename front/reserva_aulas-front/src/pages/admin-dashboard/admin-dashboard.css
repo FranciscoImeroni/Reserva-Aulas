@@ -160,9 +160,10 @@
  */
 
  .admin-dashboard {
-  padding: 20px;
+  padding: 10px;
   max-width: 1200px;
   margin: 0 auto;
+  overflow-x: auto; /* Enable horizontal scrolling if needed */
 }
 
 .dashboard-tabs {
@@ -275,4 +276,93 @@ h2 {
 
 tr.suspended-user td {
   color: #d32f2f;
+}
+
+/* Add these responsive styles at the end of the file */
+@media screen and (max-width: 768px) {
+  .admin-dashboard {
+    padding: 10px 5px;
+  }
+
+  .dashboard-tabs {
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 15px;
+  }
+
+  .tab-button {
+    padding: 8px 15px;
+    margin-right: 5px;
+    font-size: 14px;
+  }
+
+  .users-table, 
+  .reservations-table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .users-table th,
+  .users-table td,
+  .reservations-table th,
+  .reservations-table td {
+    padding: 8px;
+    font-size: 14px;
+    min-width: 120px; /* Ensure minimum width for cells */
+  }
+
+  .users-section, 
+  .reservations-section {
+    padding: 10px;
+    margin: 0 -5px;
+    border-radius: 4px;
+  }
+
+  h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+
+  h2 {
+    font-size: 20px;
+    margin-bottom: 15px;
+  }
+
+  .role-select {
+    max-width: 120px;
+    font-size: 14px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: 5px;
+  }
+}
+
+/* For very small screens */
+@media screen and (max-width: 480px) {
+  .tab-button {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  .users-table th,
+  .users-table td,
+  .reservations-table th,
+  .reservations-table td {
+    padding: 6px;
+    font-size: 13px;
+    min-width: 100px;
+  }
+
+  h1 {
+    font-size: 20px;
+  }
+
+  h2 {
+    font-size: 18px;
+  }
 }

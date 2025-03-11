@@ -1,61 +1,35 @@
-/* .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
-    background-color: #333;
-    color: white;
-  }
-  
-  .header-logo a {
-    text-decoration: none;
-    font-size: 1.5rem;
-    color: white;
-  }
-  
-  .header-nav a {
-    text-decoration: none;
-    margin: 0 10px;
-    color: white;
-    font-size: 1rem;
-  }
-  
-  .header-nav a:hover {
-    color: #ff9900; 
-  }
-   */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #333;
+  color: white;
+  height: 60px; /* Add fixed height */
+}
 
-   .header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background-color: #333;
-    color: white;
-    padding: 10px 20px;
-  }
-  
-  .header-logo {
-    flex: 1; /* Ocupa todo el espacio disponible */
-  }
-  
-  .header-logo a {
-    color: white;
-    text-decoration: none;
-    font-size: 24px;
-  }
-  
-  .header-nav {
-    display: flex;
-    flex: 0; /* Evita que tome espacio innecesario */
-    order: -1; /* Mueve el nav al inicio */
-  }
-  
-  .sidebar-toggle-btn {
-    background: none;
-    border: none;
-    font-size: 30px;
-    color: white;
-    cursor: pointer;
-    margin-right: 10px;
-  }
-  
+.header-logo {
+  flex: 1;
+  padding-left: 15px; /* Add padding to match the space taken by sidebar button */
+}
+
+.header-logo a, .header-logo span {
+  color: white;
+  text-decoration: none;
+  font-size: 24px;
+}
+
+.header-nav {
+  display: flex;
+  flex: 0;
+  order: -1;
+}
+
+.sidebar-toggle-btn {
+  background: none;
+  border: none;
+  font-size: 30px;
+  color: white;
+  cursor: pointer;
+  margin-right: 10px;
+  width: 40px; /* Fixed width for consistency */
+}

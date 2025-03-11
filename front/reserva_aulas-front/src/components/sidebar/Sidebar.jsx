@@ -1,7 +1,27 @@
 import React from 'react';
-import './Sidebar.css';  // Añadimos un archivo de estilo para el Sidebar
+import './Sidebar.css';
+import { useNavigate } from 'react-router-dom';
 
 const Sidebar = ({ isOpen, onClose }) => {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        navigate('/');
+      } else {
+        console.error('Logout failed');
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  };
+
   return (
     <div className={`sidebar ${isOpen ? 'open' : ''}`}>
       <div className="sidebar-header">
@@ -12,7 +32,7 @@ const Sidebar = ({ isOpen, onClose }) => {
           <li><a href="/home">Home</a></li>
           <li><a href="/MisReservas">Mis reservas</a></li>
           <li><a href="/settings">Perfil</a></li>
-          <li><a href="/logout">Cerrar sesión</a></li>
+          <li><button onClick={handleLogout} className="logout-button">Cerrar sesión</button></li>
         </ul>
       </div>
     </div>
