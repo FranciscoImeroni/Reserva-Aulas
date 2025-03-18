@@ -7,6 +7,7 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [reservations, setReservations] = useState([]);
+  const [aulas, setAulas] = useState([]); // Add state for aulas
   const [activeTab, setActiveTab] = useState('users');
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [expandedReservations, setExpandedReservations] = useState({});
@@ -43,6 +44,7 @@ const AdminDashboard = () => {
     // Cargar datos iniciales
     fetchUsers();
     fetchReservations();
+    fetchAulas(); // Fetch aulas data
   }, [navigate]);
 
   const fetchUsers = async () => {
@@ -73,6 +75,19 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchAulas = async () => {
+    try {
+      const DOMAIN_BACK = process.env.REACT_APP_DOMAIN_BACK;
+      const response = await fetch(`${DOMAIN_BACK}/aulas`, { // Ensure the correct endpoint
+        credentials: 'include'
+      });
+      const data = await response.json();
+      setAulas(data);
+    } catch (error) {
+      console.error('Error fetching aulas:', error);
+    }
+  };
+
   const handleChangeRole = async (userId, newRole) => {
     try {
       const DOMAIN_BACK = process.env.REACT_APP_DOMAIN_BACK;
@@ -91,20 +106,20 @@ const AdminDashboard = () => {
   };
 
   // Add this function to filter reservations by user
-const getUserReservations = async (userId) => {
-  try {
-    const DOMAIN_BACK = process.env.REACT_APP_DOMAIN_BACK;
-    const response = await fetch(`${DOMAIN_BACK}/bookings/user/${userId}`, {
-      credentials: 'include'
-    });
-    const data = await response.json();
-    setSelectedUserId(userId === selectedUserId ? null : userId);
-    setActiveTab('reservations');
-    setReservations(data);
-  } catch (error) {
-    console.error('Error fetching user reservations:', error);
-  }
-};
+  const getUserReservations = async (userId) => {
+    try {
+      const DOMAIN_BACK = process.env.REACT_APP_DOMAIN_BACK;
+      const response = await fetch(`${DOMAIN_BACK}/bookings/user/${userId}`, {
+        credentials: 'include'
+      });
+      const data = await response.json();
+      setSelectedUserId(userId === selectedUserId ? null : userId);
+      setActiveTab('reservations');
+      setReservations(data);
+    } catch (error) {
+      console.error('Error fetching user reservations:', error);
+    }
+  };
 
   const handleDeleteReservation = async (reservationId) => {
     try {
@@ -138,6 +153,46 @@ const getUserReservations = async (userId) => {
     }
   };
 
+  // Add this function inside the component
+  const handleEditAula = async (aulaId) => {
+    try {
+      const aula = aulas.find(a => a.id === aulaId);
+      const newName = prompt('Ingrese el nuevo nombre del aula:', aula.name);
+      const newCapacity = prompt('Ingrese la nueva capacidad del aula:', aula.capacity);
+  
+      if (!newName || !newCapacity) return;
+  
+      const DOMAIN_BACK = process.env.REACT_APP_DOMAIN_BACK;
+      const response = await fetch(`${DOMAIN_BACK}/aulas/${aulaId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          name: newName,
+          capacity: parseInt(newCapacity)
+        }),
+        credentials: 'include'
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update aula');
+      }
+  
+      // Update local state instead of refetching all aulas
+      setAulas(prevAulas => prevAulas.map(a => 
+        a.id === aulaId ? { ...a, name: newName, capacity: parseInt(newCapacity) } : a
+      ));
+      
+      alert('Aula actualizada correctamente');
+    } catch (error) {
+      console.error('Error updating aula:', error);
+      alert(`Error al actualizar el aula: ${error.message}`);
+    }
+  };
+
   return (
     <div className="admin-dashboard">
       <h1>Panel de Administración</h1>
@@ -154,6 +209,12 @@ const getUserReservations = async (userId) => {
           onClick={() => setActiveTab('reservations')}
         >
           Reservas
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'aulas' ? 'active' : ''}`}
+          onClick={() => setActiveTab('aulas')}
+        >
+          Aulas
         </button>
       </div>
 
@@ -297,6 +358,40 @@ const getUserReservations = async (userId) => {
         </table>
       </div>
     )}
+
+    {activeTab === 'aulas' && (
+      <div className="aulas-section">
+        <h2>Gestión de Aulas</h2>
+        <table className="aulas-table">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Capacidad</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {aulas.map(aula => (
+              <tr key={aula.id}>
+                <td>{aula.name}</td>
+                <td>{aula.capacity}</td>
+                <td>
+                  <button 
+                    onClick={() => handleEditAula(aula.id)} 
+                    className="edit-btn"
+                  >
+                    Editar
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )}
   </div>
-)}
+  );
+};
+
+// Remove the external handleEditAula function from here
 export default AdminDashboard;

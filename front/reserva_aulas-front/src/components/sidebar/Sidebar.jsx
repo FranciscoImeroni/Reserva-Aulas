@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 const Sidebar = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
+  const userRole = localStorage.getItem('userRole'); // Directly get the value
 
   const handleLogout = async () => {
     try {
@@ -32,6 +33,9 @@ const Sidebar = ({ isOpen, onClose }) => {
           <li><a href="/home">Home</a></li>
           <li><a href="/MisReservas">Mis reservas</a></li>
           <li><a href="/settings">Perfil</a></li>
+          {userRole === 'admin' && (
+            <li><a href="/admin-dashboard">Administrar</a></li>
+          )}
           <li><button onClick={handleLogout} className="logout-button">Cerrar sesión</button></li>
         </ul>
       </div>

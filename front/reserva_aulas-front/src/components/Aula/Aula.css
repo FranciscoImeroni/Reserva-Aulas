@@ -7,21 +7,60 @@
     box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
-  }
-    
-  .aula-card:hover {
-    transform: scale(1.02);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  }
-  
-  
-  .aula-name {
+    overflow: hidden;
+    position: relative;
+    min-height: 80px; /* Añadir altura mínima */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.aula-name-container {
+    overflow-x: auto;
+    white-space: nowrap;
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Hide scrollbar for Firefox */
+    -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
+}
+
+.aula-name-container::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for Chrome/Safari */
+}
+
+.aula-name {
     font-size: 20px;
     font-weight: bold;
     color: #ffffff;
     margin: auto;
     margin-left: 4px;
+    display: inline-block;
+    white-space: nowrap;
+    padding-right: 20px; /* Space for gradient */
+}
+
+.aula-name-container::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 30px;
+    background: linear-gradient(to right, rgba(131, 157, 209, 0), #839DD1);
+}
+
+/* Eliminar el @keyframes scrollText */
+
+@keyframes scrollText {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+}
+  
+  .aula-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   }
+  
   
   .aula-capacity {
     font-size: 14px;

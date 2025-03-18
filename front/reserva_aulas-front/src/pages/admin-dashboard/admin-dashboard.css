@@ -226,13 +226,30 @@ select:hover {
   border-color: #007bff;
 }
 
-.users-section, .reservations-section {
+.aulas-section {
   background-color: white;
   border-radius: 8px;
   padding: 20px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+.aulas-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.aulas-table th,
+.aulas-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.aulas-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
 h1 {
   color: #333;
   margin-bottom: 30px;

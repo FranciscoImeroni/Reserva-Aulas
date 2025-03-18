@@ -6,6 +6,7 @@ import { Variable } from './entities/variable.entity';
 import { AulaVariable } from './entities/aula-variable.entity';
 import { CreateAulaDto } from './dto/CreateAulaDto.dto';
 import { CreateVariableDto } from './dto/create-variable.dto';
+import { UpdateAulaDto } from './dto/update-aula.dto';
 
 @Injectable()
 export class AulasService {
@@ -17,6 +18,23 @@ export class AulasService {
 
   async create(createAulaDto: CreateAulaDto): Promise<Aula> {
     const aula = this.aulaRepository.create(createAulaDto);
+    return await this.aulaRepository.save(aula);
+  }
+
+  async updateAula(id: string, updateAulaDto: UpdateAulaDto): Promise<Aula> {
+    const aula = await this.aulaRepository.findOneBy({ id });
+    if (!aula) {
+      throw new NotFoundException(`Aula with ID ${id} not found`);
+    }
+    
+    // Only update provided fields
+    if (updateAulaDto.name !== undefined) {
+      aula.name = updateAulaDto.name;
+    }
+    if (updateAulaDto.capacity !== undefined) {
+      aula.capacity = updateAulaDto.capacity;
+    }
+    
     return await this.aulaRepository.save(aula);
   }
 

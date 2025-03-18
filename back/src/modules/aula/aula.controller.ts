@@ -4,6 +4,8 @@ import { Aula } from './entities/aula.entity';
 import { CreateAulaDto } from './dto/CreateAulaDto.dto';
 import { Variable } from './entities/variable.entity';
 import { CreateVariableDto } from './dto/create-variable.dto';
+import { Patch } from '@nestjs/common';
+import { UpdateAulaDto } from './dto/update-aula.dto';
 
 @Controller('aulas')
 export class AulasController {
@@ -74,5 +76,19 @@ export class AulasController {
     return { names };
   }
 
-  
+  @Patch(':id')
+  async updateAula(
+    @Param('id') id: string,
+    @Body() updateAulaDto: UpdateAulaDto
+  ) {
+    try {
+      const updatedAula = await this.aulasService.updateAula(id, updateAulaDto);
+      return updatedAula;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      }
+      throw new HttpException('Unknown error occurred', HttpStatus.BAD_REQUEST);
+    }
+  }
 }

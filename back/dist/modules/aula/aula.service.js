@@ -40,6 +40,22 @@ let AulasService = class AulasService {
             return yield this.aulaRepository.save(aula);
         });
     }
+    updateAula(id, updateAulaDto) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const aula = yield this.aulaRepository.findOneBy({ id });
+            if (!aula) {
+                throw new common_1.NotFoundException(`Aula with ID ${id} not found`);
+            }
+            // Only update provided fields
+            if (updateAulaDto.name !== undefined) {
+                aula.name = updateAulaDto.name;
+            }
+            if (updateAulaDto.capacity !== undefined) {
+                aula.capacity = updateAulaDto.capacity;
+            }
+            return yield this.aulaRepository.save(aula);
+        });
+    }
     /*   async getAulas(): Promise<Aula[]> {
         return await this.aulaRepository.find({ relations: ['variables'] });
       } */
