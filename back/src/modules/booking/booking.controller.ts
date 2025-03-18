@@ -42,7 +42,23 @@ export class BookingController {
   async getBookingsByUserId(
     @Param('userId', new ParseUUIDPipe()) userId: string,
   ): Promise<Booking[]> {
-    return this.bookingService.getBookingsByUserId(userId);
+    try {
+      // Check if any bookings exist for the user
+      const bookings = await this.bookingService.getBookingsByUserId(userId);
+      
+      if (!bookings || bookings.length === 0) {
+        throw new NotFoundException(`No bookings found for user with ID: ${userId}`);
+      }
+      
+      return bookings;
+    } catch (error) {
+      // If error is already a NotFoundException, rethrow it
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      // Handle any other errors that might occur
+      throw new Error(`Error fetching bookings for user ${userId}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   }
 
   @Get('reservas/:aulaId')
@@ -59,7 +75,8 @@ export class BookingController {
   }
  */
   @Delete(':id')
-  async deleteBooking(@Param('id') id: number) {
+  @Roles(Role.Admin)
+  async deleteBooking(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.bookingService.deleteBooking(id);
   }
 }

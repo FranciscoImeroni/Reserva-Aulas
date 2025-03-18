@@ -25,14 +25,14 @@ const MisReservas = () => {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${Cookies.get('Authentication')}` 
-          }
+          },
+          credentials: 'include', // Add this to include cookies
         });
     
         console.log('Response status:', response.status);
     
         if (!response.ok) {
-          const errorText = await response.text(); // Solo leer el error si la respuesta no es OK
+          const errorText = await response.text();
           console.error('Error en la respuesta:', errorText);
           throw new Error('Error al obtener las reservas');
         }
@@ -52,7 +52,6 @@ const MisReservas = () => {
         setLoading(false);
       }
     };
-    
 
     obtenerReservas();
   }, []);

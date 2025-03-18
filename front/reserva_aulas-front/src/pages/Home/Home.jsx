@@ -70,20 +70,19 @@ const Home = () => {
 
       try {
         const DOMAIN_BACK = process.env.REACT_APP_DOMAIN_BACK;
-        // 1️⃣ Obtener el usuario desde la base de datos
         const response = await fetch(`${DOMAIN_BACK}/auth/me`, {
+          credentials: 'include', // Add this to send cookies
           headers: {
-            Authorization: `Bearer ${token}`,
-          },
+            'Content-Type': 'application/json'
+          }
         });
 
         if (!response.ok) throw new Error("Error obteniendo usuario");
 
         const userFromDB = await response.json();
-        const storedTokenData = JSON.parse(atob(token.split(".")[1])); // Decodifica el token JWT
+        const storedTokenData = JSON.parse(atob(token.split(".")[1]));
         const storedRole = storedTokenData.role;
 
-        // 2️⃣ Si el rol no coincide, cerrar sesión y redirigir
         if (userFromDB.user.role !== storedRole) {
           console.log("Rol en la base de datos:", userFromDB.user.role);
           console.log("Rol en el token:", storedRole);

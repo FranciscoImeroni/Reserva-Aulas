@@ -128,25 +128,60 @@ export class BookingService {
       
 
   // Obtener todas las reservas
+  // Update getAllBookings method
   async getAllBookings(): Promise<Booking[]> {
-    return await this.bookingRepository.find({ relations: ['user', 'aula'] });
+    const bookings = await this.bookingRepository.find({ 
+      relations: ['user', 'aula'],
+      order: {
+        createdAt: 'DESC'
+      }
+    });
+  
+    // Process variable names for all bookings
+    const processedBookings = await Promise.all(
+      bookings.map(async (booking) => {
+        const variables = await this.variableRepository.findByIds(booking.selectedVariables);
+        const variableNames = variables.map(variable => variable.name);
+        return {
+          ...booking,
+          selectedVariables: variableNames
+        };
+      })
+    );
+  
+    return processedBookings;
   }
   
 
-  // Obtener una reserva por ID
-  async getBookingsByUserId(userId: string): Promise<Booking[]> {
-    const bookings = await this.bookingRepository.find({
-      where: { user: { id: userId } },
-      relations: ['user', 'aula'], // Opcional: incluir relaciones para datos completos
-      order: { createdAt: 'DESC' },
-    });
+// Obtener una reserva por ID
+async getBookingsByUserId(userId: string): Promise<Booking[]> {
+  const bookings = await this.bookingRepository.find({
+    where: { user: { id: userId } },
+    relations: ['user', 'aula'],
+    order: {
+      createdAt: 'DESC' // Sort by creation date in descending order (newest first)
+    },
+  });
 
-    if (!bookings || bookings.length === 0) {
-      throw new NotFoundException(`No bookings found for user with ID: ${userId}`);
-    }
-
-    return bookings;
+  if (!bookings || bookings.length === 0) {
+    throw new NotFoundException(`No bookings found for user with ID: ${userId}`);
   }
+
+  // Get variable names for each booking
+  const processedBookings = await Promise.all(
+    bookings.map(async (booking) => {
+      const variables = await this.variableRepository.findByIds(booking.selectedVariables);
+      const variableNames = variables.map(variable => variable.name);
+      return {
+        ...booking,
+        selectedVariables: variableNames // Replace IDs with names
+      };
+    })
+  );
+
+  // No need for additional sorting since we're already sorting by createdAt DESC in the query
+  return processedBookings;
+}
 
   private getTimeSlotsInRange(start: string, end: string): string[] {
     const slots = [];
@@ -162,7 +197,7 @@ export class BookingService {
       startMinute += 30;
       if (startMinute === 60) {
         startMinute = 0;
-        startHour += 1;
+        startHour += 1; 
       }
     }
     return slots;
@@ -193,9 +228,21 @@ export class BookingService {
   } */
 
   // Eliminar una reserva
-  async deleteBooking(id: number): Promise<void> {
-    const result = await this.bookingRepository.delete(id);
-    if (result.affected === 0) throw new NotFoundException(`Booking with ID ${id} not found`);
+  async deleteBooking(id: string): Promise<void> {
+    try {
+      const booking = await this.bookingRepository.findOne({
+        where: { id },
+        relations: ['user', 'aula']
+      });
+      
+      if (!booking) {
+        throw new NotFoundException(`Booking with ID ${id} not found`);
+      }
+  
+      await this.bookingRepository.remove(booking);
+    } catch (error) {
+      throw new NotFoundException(`Error deleting booking`);
+    }
   }
 
   async getBookingsForDay(aulaId: string, fecha: string): Promise<{ reservedSlots: string[] }> {

@@ -119,9 +119,22 @@ let BookingService = class BookingService {
           return await this.bookingRepository.save(booking);
         } */
     // Obtener todas las reservas
+    // Update getAllBookings method
     getAllBookings() {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.bookingRepository.find({ relations: ['user', 'aula'] });
+            const bookings = yield this.bookingRepository.find({
+                relations: ['user', 'aula'],
+                order: {
+                    createdAt: 'DESC'
+                }
+            });
+            // Process variable names for all bookings
+            const processedBookings = yield Promise.all(bookings.map((booking) => __awaiter(this, void 0, void 0, function* () {
+                const variables = yield this.variableRepository.findByIds(booking.selectedVariables);
+                const variableNames = variables.map(variable => variable.name);
+                return Object.assign(Object.assign({}, booking), { selectedVariables: variableNames });
+            })));
+            return processedBookings;
         });
     }
     // Obtener una reserva por ID
@@ -129,13 +142,23 @@ let BookingService = class BookingService {
         return __awaiter(this, void 0, void 0, function* () {
             const bookings = yield this.bookingRepository.find({
                 where: { user: { id: userId } },
-                relations: ['user', 'aula'], // Opcional: incluir relaciones para datos completos
-                order: { createdAt: 'DESC' },
+                relations: ['user', 'aula'],
+                order: {
+                    createdAt: 'DESC' // Sort by creation date in descending order (newest first)
+                },
             });
             if (!bookings || bookings.length === 0) {
                 throw new common_1.NotFoundException(`No bookings found for user with ID: ${userId}`);
             }
-            return bookings;
+            // Get variable names for each booking
+            const processedBookings = yield Promise.all(bookings.map((booking) => __awaiter(this, void 0, void 0, function* () {
+                const variables = yield this.variableRepository.findByIds(booking.selectedVariables);
+                const variableNames = variables.map(variable => variable.name);
+                return Object.assign(Object.assign({}, booking), { selectedVariables: variableNames // Replace IDs with names
+                 });
+            })));
+            // No need for additional sorting since we're already sorting by createdAt DESC in the query
+            return processedBookings;
         });
     }
     getTimeSlotsInRange(start, end) {
@@ -181,9 +204,19 @@ let BookingService = class BookingService {
     // Eliminar una reserva
     deleteBooking(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            const result = yield this.bookingRepository.delete(id);
-            if (result.affected === 0)
-                throw new common_1.NotFoundException(`Booking with ID ${id} not found`);
+            try {
+                const booking = yield this.bookingRepository.findOne({
+                    where: { id },
+                    relations: ['user', 'aula']
+                });
+                if (!booking) {
+                    throw new common_1.NotFoundException(`Booking with ID ${id} not found`);
+                }
+                yield this.bookingRepository.remove(booking);
+            }
+            catch (error) {
+                throw new common_1.NotFoundException(`Error deleting booking`);
+            }
         });
     }
     getBookingsForDay(aulaId, fecha) {

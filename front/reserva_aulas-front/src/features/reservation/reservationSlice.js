@@ -16,22 +16,16 @@ const initialState = {
 // Thunk para crear una reserva
 export const createReservation = createAsyncThunk(
   'reservation/createReservation',
-  async (newReservation, { rejectWithValue, getState }) => {
+  async (newReservation, { rejectWithValue }) => {
     try {
-      const state = getState();
-      const token = state.auth.token;
-      console.log("Token en Redux:", state.token);
-      console.log("Token en el componente:", token);
-
-
       const DOMAIN_BACK = process.env.REACT_APP_DOMAIN_BACK;
       
       const response = await fetch(`${DOMAIN_BACK}/bookings`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
+        credentials: 'include', // Add this to include cookies
         body: JSON.stringify(newReservation),
       });
 
@@ -95,28 +89,3 @@ export const {
 } = reservationSlice.actions;
 
 export default reservationSlice.reducer;
-
-
-
-/* export const createReservation = createAsyncThunk(
-  'reservation/createReservation',
-  async (newReservation, { rejectWithValue }) => {
-    try {
-      const response = await fetch('http://localhost:3000/bookings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newReservation),
-      });
-
-      if (!response.ok) {
-        const errorMessage = await response.text();
-        throw new Error(errorMessage || 'Error creating reservation');
-      }
-
-      const data = await response.json();
-      return data; // Retorna la nueva reserva
-    } catch (error) {
-      return rejectWithValue(error.message || 'Failed to create reservation');
-    }
-  }
-); */

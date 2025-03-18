@@ -58,7 +58,7 @@ const Confirmation = () => {
   }, [selectedVariables]);
 
 
-  const handleConfirmReservation = () => {
+  const handleConfirmReservation = async () => {
     // Validar todos los campos requeridos
     const missingFields = [];
 

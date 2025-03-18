@@ -31,6 +31,7 @@ const user_entity_1 = require("../user/entity/user.entity");
 const roles_decorators_1 = require("../../Decorators/roles.decorators");
 const roles_enum_1 = require("../user/dto/roles.enum");
 const jwt_auth_guard_1 = require("../auth/guard/jwt-auth.guard");
+const common_2 = require("@nestjs/common");
 let BookingController = class BookingController {
     constructor(bookingService) {
         this.bookingService = bookingService;
@@ -55,7 +56,22 @@ let BookingController = class BookingController {
     }
     getBookingsByUserId(userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.bookingService.getBookingsByUserId(userId);
+            try {
+                // Check if any bookings exist for the user
+                const bookings = yield this.bookingService.getBookingsByUserId(userId);
+                if (!bookings || bookings.length === 0) {
+                    throw new common_2.NotFoundException(`No bookings found for user with ID: ${userId}`);
+                }
+                return bookings;
+            }
+            catch (error) {
+                // If error is already a NotFoundException, rethrow it
+                if (error instanceof common_2.NotFoundException) {
+                    throw error;
+                }
+                // Handle any other errors that might occur
+                throw new Error(`Error fetching bookings for user ${userId}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            }
         });
     }
     getBookingsForDay(aulaId, fecha) {
@@ -108,9 +124,10 @@ __decorate([
 ], BookingController.prototype, "getBookingsForDay", null);
 __decorate([
     (0, common_1.Delete)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, roles_decorators_1.Roles)(roles_enum_1.Role.Admin),
+    __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number]),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], BookingController.prototype, "deleteBooking", null);
 exports.BookingController = BookingController = __decorate([

@@ -64,9 +64,10 @@
 .success-message {
   background-color: #e8f5e9;
   color: #2e7d32;
-  padding: 15px;
+  padding: 3px;
   border-radius: 5px;
-  margin-top: 15px;
+  margin-top: 10px;
+  margin-bottom: 15px;
   border: 1px solid #a5d6a7;
   width: 100%;
   max-width: 500px;

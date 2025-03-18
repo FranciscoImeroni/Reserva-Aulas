@@ -8,6 +8,23 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [reservations, setReservations] = useState([]);
   const [activeTab, setActiveTab] = useState('users');
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [expandedReservations, setExpandedReservations] = useState({});
+  const [expandedHours, setExpandedHours] = useState({});
+
+  const toggleDatesExpansion = (reservationId) => {
+    setExpandedReservations(prev => ({
+      ...prev,
+      [reservationId]: !prev[reservationId]
+    }));
+  };
+
+  const toggleHoursExpansion = (reservationId) => {
+    setExpandedHours(prev => ({
+      ...prev,
+      [reservationId]: !prev[reservationId]
+    }));
+  };
 
   useEffect(() => {
     // Verificar si el usuario es admin
@@ -48,7 +65,7 @@ const AdminDashboard = () => {
         credentials: 'include'
       });
       const data = await response.json();
-      console.log("Datos recibidos:", data); // <-- Agrega esto
+      console.log("Datos recibidos:", data); 
 
       setReservations(data);
     } catch (error) {
@@ -70,6 +87,54 @@ const AdminDashboard = () => {
       fetchUsers();
     } catch (error) {
       console.error('Error changing role:', error);
+    }
+  };
+
+  // Add this function to filter reservations by user
+const getUserReservations = async (userId) => {
+  try {
+    const DOMAIN_BACK = process.env.REACT_APP_DOMAIN_BACK;
+    const response = await fetch(`${DOMAIN_BACK}/bookings/user/${userId}`, {
+      credentials: 'include'
+    });
+    const data = await response.json();
+    setSelectedUserId(userId === selectedUserId ? null : userId);
+    setActiveTab('reservations');
+    setReservations(data);
+  } catch (error) {
+    console.error('Error fetching user reservations:', error);
+  }
+};
+
+  const handleDeleteReservation = async (reservationId) => {
+    try {
+      // Ask for confirmation before deleting
+      if (!window.confirm('¿Está seguro de que desea eliminar esta reserva?')) {
+        return;
+      }
+
+      const DOMAIN_BACK = process.env.REACT_APP_DOMAIN_BACK;
+      const response = await fetch(`${DOMAIN_BACK}/bookings/${reservationId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to delete reservation');
+      }
+  
+      // Wait a moment before refreshing the data
+      await new Promise(resolve => setTimeout(resolve, 100));
+  
+      // Refresh the reservations list
+      if (selectedUserId) {
+        await getUserReservations(selectedUserId);
+      } else {
+        await fetchReservations();
+      }
+    } catch (error) {
+      console.error('Error deleting reservation:', error);
+      alert('Error al eliminar la reserva. Por favor, intente nuevamente.');
     }
   };
 
@@ -101,6 +166,7 @@ const AdminDashboard = () => {
                 <th>Email</th>
                 <th>Rol</th>
                 <th>Acciones</th>
+                <th>Reservas</th>
               </tr>
             </thead>
             <tbody>
@@ -119,6 +185,14 @@ const AdminDashboard = () => {
                       <option value="suspended">Suspendido</option>
                     </select>
                   </td>
+                  <td>
+                    <button 
+                      onClick={() => getUserReservations(user.id)}
+                      className="view-reservations-btn"
+                    >
+                      Ver reservas
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -128,36 +202,101 @@ const AdminDashboard = () => {
 
       {activeTab === 'reservations' && (
         <div className="reservations-section">
-          <h2>Gestión de Reservas</h2>
+          <h2>
+            {selectedUserId ? 
+              `Reservas del usuario: ${users.find(u => u.id === selectedUserId)?.email}` : 
+              'Gestión de Reservas'
+            }
+          </h2>
           <table className="reservations-table">
             <thead>
               <tr>
-                <th>Usuario</th>
                 <th>Aula</th>
-                <th>Fecha</th>
-                <th>Estado</th>
+                <th>Días</th>
+                <th>Horarios</th>
+                <th>Variables</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
-            {Array.isArray(reservations) && reservations.length > 0 ? (
-  reservations.map(reservation => (
-    <tr key={reservation.id}>
-      <td>{reservation.user.email}</td>
-      <td>{reservation.aula.name}</td>
-      <td>{new Date(reservation.date).toLocaleDateString()}</td>
-      <td>{reservation.status}</td>
-    </tr>
-  ))
-) : (
-  <tr><td colSpan="4">No hay reservas</td></tr>
+              {Array.isArray(reservations) && reservations.length > 0 ? (
+                reservations
+                  .filter(reservation => !selectedUserId || reservation.user.id === selectedUserId)
+                  .map(reservation => (
+                    <tr key={reservation.id}>
+                      <td>{reservation.aula.name}</td>
+                      <td>
+                        {reservation.reservationDays.length > 4 && !expandedReservations[reservation.id] ? (
+                          <>
+                            {reservation.reservationDays.slice(0, 4).map(date => 
+                              new Date(date).toLocaleDateString()
+                            ).join(', ')}
+                            <button 
+                              className="show-more-btn"
+                              onClick={() => toggleDatesExpansion(reservation.id)}
+                            >
+                              Ver todo ({reservation.reservationDays.length})
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            {reservation.reservationDays.map(date => 
+                              new Date(date).toLocaleDateString()
+                            ).join(', ')}
+                            {reservation.reservationDays.length > 4 && (
+                              <button 
+                                className="show-less-btn"
+                                onClick={() => toggleDatesExpansion(reservation.id)}
+                              >
+                                Ver menos
+                              </button>
+                            )}
+                          </>
+                        )}
+                      </td>
+                      <td>
+                        {reservation.reservationHours.length > 6 && !expandedHours[reservation.id] ? (
+                          <>
+                            {reservation.reservationHours.slice(0, 6).join(', ')}
+                            <button 
+                              className="show-more-btn"
+                              onClick={() => toggleHoursExpansion(reservation.id)}
+                            >
+                              Ver todo ({reservation.reservationHours.length})
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            {reservation.reservationHours.join(', ')}
+                            {reservation.reservationHours.length > 6 && (
+                              <button 
+                                className="show-less-btn"
+                                onClick={() => toggleHoursExpansion(reservation.id)}
+                              >
+                                Ver menos
+                              </button>
+                            )}
+                          </>
+                        )}
+                      </td>
+                      <td>{reservation.selectedVariables.join(', ')}</td>
+                      <td>
+                        <button 
+                          onClick={() => handleDeleteReservation(reservation.id)}
+                          className="delete-reservation-btn"
+                        >
+                          Eliminar
+                        </button>
+                      </td>
+                    </tr>
+                ))
+            ) : (
+              <tr><td colSpan="5">No hay reservas</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    )}
+  </div>
 )}
-
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
-  );
-};
-
 export default AdminDashboard;
