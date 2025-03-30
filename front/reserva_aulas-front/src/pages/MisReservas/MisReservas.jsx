@@ -13,40 +13,34 @@ const MisReservas = () => {
       try {
         setLoading(true);
         setError(null);
-    
+
         const userId = Cookies.get('userId');
         if (!userId) {
           throw new Error('No se encontró el ID del usuario.');
         }
-    
+
         const DOMAIN_BACK = process.env.REACT_APP_DOMAIN_BACK;
-    
+
         const response = await fetch(`${DOMAIN_BACK}/bookings/user/${userId}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
-          credentials: 'include', // Add this to include cookies
+          credentials: 'include',
         });
-    
-        console.log('Response status:', response.status);
-    
+
         if (!response.ok) {
           const errorText = await response.text();
-          console.error('Error en la respuesta:', errorText);
           throw new Error('Error al obtener las reservas');
         }
-    
+
         const data = await response.json();
-        console.log('Data recibida:', data);
-    
         const reservasOrdenadas = data.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
-    
+
         setReservas(reservasOrdenadas);
       } catch (err) {
-        console.error(err);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -55,6 +49,34 @@ const MisReservas = () => {
 
     obtenerReservas();
   }, []);
+
+  const handleDeleteReserva = async (reservaId) => {
+    try {
+      if (!window.confirm('¿Está seguro de que desea eliminar esta reserva?')) {
+        return;
+      }
+
+      const DOMAIN_BACK = process.env.REACT_APP_DOMAIN_BACK;
+      const response = await fetch(`${DOMAIN_BACK}/bookings/${reservaId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al eliminar la reserva');
+      }
+
+      // Remove the deleted reservation from the state
+      setReservas(prevReservas => prevReservas.filter(reserva => reserva.id !== reservaId));
+      alert('Reserva eliminada correctamente');
+    } catch (err) {
+      console.error(err);
+      alert('Error al eliminar la reserva. Por favor, intente nuevamente.');
+    }
+  };
 
   return (
     <div className="mis-reservas-container">
@@ -83,6 +105,9 @@ const MisReservas = () => {
                 <strong>Fecha de Creación:</strong>{' '}
                 {new Date(reserva.createdAt).toLocaleDateString()}
               </div>
+              <button onClick={() => handleDeleteReserva(reserva.id)} className="delete-button">
+                Eliminar Reserva
+              </button>
             </li>
           ))}
         </ul>

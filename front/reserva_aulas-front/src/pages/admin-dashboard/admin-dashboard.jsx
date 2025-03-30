@@ -12,8 +12,8 @@ const AdminDashboard = () => {
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [expandedReservations, setExpandedReservations] = useState({});
   const [expandedHours, setExpandedHours] = useState({});
-  const [setShowCreateAulaModal] = useState(false); // Define state for modal visibility
-  const [setNewAula] = useState({ name: '', capacity: '' }); // Define state for new aula data
+  const [showCreateAulaModal, setShowCreateAulaModal] = useState(false); // Correctly define state for modal visibility
+  const [newAula, setNewAula] = useState({ name: '', capacity: '' }); // Correctly define state for new aula data
 
   const toggleDatesExpansion = (reservationId) => {
     setExpandedReservations(prev => ({
@@ -274,7 +274,7 @@ const AdminDashboard = () => {
           Reservas
         </button>
         <button 
-          className={`tab-button ${activeTab === 'aulas' ? 'active' : ''}`}
+          className={`tab-button ${activeTab === 'aulas' ? 'active' : ''}`} // Ensure consistent class usage
           onClick={() => setActiveTab('aulas')}
         >
           Aulas
