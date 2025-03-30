@@ -7,11 +7,13 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [reservations, setReservations] = useState([]);
-  const [aulas, setAulas] = useState([]); // Add state for aulas
+  const [aulas, setAulas] = useState([]);
   const [activeTab, setActiveTab] = useState('users');
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [expandedReservations, setExpandedReservations] = useState({});
   const [expandedHours, setExpandedHours] = useState({});
+  const [setShowCreateAulaModal] = useState(false); // Define state for modal visibility
+  const [setNewAula] = useState({ name: '', capacity: '' }); // Define state for new aula data
 
   const toggleDatesExpansion = (reservationId) => {
     setExpandedReservations(prev => ({
@@ -78,11 +80,11 @@ const AdminDashboard = () => {
   const fetchAulas = async () => {
     try {
       const DOMAIN_BACK = process.env.REACT_APP_DOMAIN_BACK;
-      const response = await fetch(`${DOMAIN_BACK}/aulas`, { // Ensure the correct endpoint
+      const response = await fetch(`${DOMAIN_BACK}/aulas`, {
         credentials: 'include'
       });
       const data = await response.json();
-      setAulas(data);
+      setAulas(data.filter(aula => aula.visible)); // Filter visible aulas
     } catch (error) {
       console.error('Error fetching aulas:', error);
     }
@@ -190,6 +192,67 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error('Error updating aula:', error);
       alert(`Error al actualizar el aula: ${error.message}`);
+    }
+  };
+
+  const handleCreateAula = async () => {
+    try {
+      // Prompt the user for the aula name and capacity
+      const name = window.prompt('Ingrese el nombre del aula:');
+      const capacity = window.prompt('Ingrese la capacidad del aula:');
+  
+      // Check if the user provided both values
+      if (!name || !capacity) {
+        alert('Debe ingresar tanto el nombre como la capacidad del aula.');
+        return;
+      }
+  
+      const DOMAIN_BACK = process.env.REACT_APP_DOMAIN_BACK;
+      const response = await fetch(`${DOMAIN_BACK}/aulas`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ name, capacity: parseInt(capacity) }) // Ensure correct data format
+      });
+  
+      if (response.ok) {
+        setShowCreateAulaModal(false);
+        fetchAulas(); // Refresh the aulas list
+        setNewAula({ name: '', capacity: '' }); // Reset form
+      }
+    } catch (error) {
+      console.error('Error creating aula:', error);
+    }
+  };
+
+  const handleDeleteAula = async (aulaId) => {
+    try {
+      // Ask for confirmation before hiding
+      if (!window.confirm('¿Está seguro de que desea borrar esta aula?')) {
+        return;
+      }
+
+      const DOMAIN_BACK = process.env.REACT_APP_DOMAIN_BACK;
+      const response = await fetch(`${DOMAIN_BACK}/aulas/${aulaId}/toggleVisibility`, { // Updated endpoint
+        method: 'PATCH', // Changed method to PATCH
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include'
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to delete aula');
+      }
+  
+      // Refresh the aulas list
+      fetchAulas();
+      alert('Aula borrada correctamente');
+    } catch (error) {
+      console.error('Error deleting aula:', error);
+      alert('Error al borrar el aula. Por favor, intente nuevamente.');
     }
   };
 
@@ -362,12 +425,19 @@ const AdminDashboard = () => {
     {activeTab === 'aulas' && (
       <div className="aulas-section">
         <h2>Gestión de Aulas</h2>
+        <button 
+          className="add-btn" 
+          onClick={handleCreateAula}
+        >
+          Crear Aula
+        </button>
         <table className="aulas-table">
           <thead>
             <tr>
               <th>Nombre</th>
               <th>Capacidad</th>
               <th>Acciones</th>
+              <th>Eliminar</th> {/* New column for delete button */}
             </tr>
           </thead>
           <tbody>
@@ -383,6 +453,14 @@ const AdminDashboard = () => {
                     Editar
                   </button>
                 </td>
+                <td>
+                  <button 
+                    onClick={() => handleDeleteAula(aula.id)} 
+                    className="delete-btn"
+                  >
+                    Eliminar
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -393,5 +471,4 @@ const AdminDashboard = () => {
   );
 };
 
-// Remove the external handleEditAula function from here
 export default AdminDashboard;

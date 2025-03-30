@@ -31,6 +31,11 @@ __decorate([
     __metadata("design:type", Number)
 ], Aula.prototype, "capacity", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ default: true }) // Add this field
+    ,
+    __metadata("design:type", Boolean)
+], Aula.prototype, "visible", void 0);
+__decorate([
     (0, typeorm_1.OneToMany)(() => aula_variable_entity_1.AulaVariable, (aulaVariable) => aulaVariable.aula, { eager: true }),
     __metadata("design:type", Array)
 ], Aula.prototype, "aulaVariables", void 0);

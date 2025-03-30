@@ -165,6 +165,16 @@ let AulasService = class AulasService {
             return names.length > 0 ? names : ['Unknown Variables'];
         });
     }
+    toggleAulaVisibility(aulaId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const aula = yield this.aulaRepository.findOneBy({ id: aulaId });
+            if (!aula) {
+                throw new common_1.NotFoundException(`Aula with ID ${aulaId} not found`);
+            }
+            aula.visible = !aula.visible; // Toggle visibility
+            return yield this.aulaRepository.save(aula);
+        });
+    }
 };
 exports.AulasService = AulasService;
 exports.AulasService = AulasService = __decorate([

@@ -15,6 +15,9 @@ export class Aula {
   @Column()
   capacity: number;
 
+  @Column({ default: true }) // Add this field
+  visible: boolean;
+
   @OneToMany(() => AulaVariable, (aulaVariable) => aulaVariable.aula, { eager: true })
   aulaVariables: AulaVariable[];
 

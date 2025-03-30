@@ -1,10 +1,9 @@
-import { Controller, Post, Get, Body, Param, BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Patch, BadRequestException, HttpStatus, HttpException } from '@nestjs/common';
 import { AulasService } from './aula.service';
 import { Aula } from './entities/aula.entity';
 import { CreateAulaDto } from './dto/CreateAulaDto.dto';
 import { Variable } from './entities/variable.entity';
 import { CreateVariableDto } from './dto/create-variable.dto';
-import { Patch } from '@nestjs/common';
 import { UpdateAulaDto } from './dto/update-aula.dto';
 
 @Controller('aulas')
@@ -15,11 +14,6 @@ export class AulasController {
   async create(@Body() createAulaDto: CreateAulaDto): Promise<Aula> {
     return this.aulasService.create(createAulaDto);
   }  
-
-/*   @Get()
-  async getAulas() {
-    return await this.aulasService.getAulas();
-  } */
 
     @Get()
     async getAllAulas(): Promise<Aula[]> {
@@ -39,13 +33,6 @@ export class AulasController {
   ) {
     return await this.aulasService.assignVariableToAula(aulaId, variableId, valor);
   }
-/* 
-  @Post('createVariable')
-  async createVariable(
-    @Body('name') name: string,
-  ): Promise<Variable> {
-    return this.aulasService.createVariable(name);
-  } */
 
   @Post('variables')
   async createVariable(@Body() createVariableDto: CreateVariableDto) {
@@ -90,5 +77,10 @@ export class AulasController {
       }
       throw new HttpException('Unknown error occurred', HttpStatus.BAD_REQUEST);
     }
+  }
+
+  @Patch(':aulaId/toggleVisibility')
+  async toggleVisibility(@Param('aulaId') aulaId: string): Promise<Aula> {
+    return this.aulasService.toggleAulaVisibility(aulaId);
   }
 }

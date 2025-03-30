@@ -26,7 +26,6 @@ const common_1 = require("@nestjs/common");
 const aula_service_1 = require("./aula.service");
 const CreateAulaDto_dto_1 = require("./dto/CreateAulaDto.dto");
 const create_variable_dto_1 = require("./dto/create-variable.dto");
-const common_2 = require("@nestjs/common");
 const update_aula_dto_1 = require("./dto/update-aula.dto");
 let AulasController = class AulasController {
     constructor(aulasService) {
@@ -37,10 +36,6 @@ let AulasController = class AulasController {
             return this.aulasService.create(createAulaDto);
         });
     }
-    /*   @Get()
-      async getAulas() {
-        return await this.aulasService.getAulas();
-      } */
     getAllAulas() {
         return __awaiter(this, void 0, void 0, function* () {
             return this.aulasService.findAll();
@@ -56,13 +51,6 @@ let AulasController = class AulasController {
             return yield this.aulasService.assignVariableToAula(aulaId, variableId, valor);
         });
     }
-    /*
-      @Post('createVariable')
-      async createVariable(
-        @Body('name') name: string,
-      ): Promise<Variable> {
-        return this.aulasService.createVariable(name);
-      } */
     createVariable(createVariableDto) {
         return __awaiter(this, void 0, void 0, function* () {
             return this.aulasService.createVariable(createVariableDto);
@@ -101,6 +89,11 @@ let AulasController = class AulasController {
                 }
                 throw new common_1.HttpException('Unknown error occurred', common_1.HttpStatus.BAD_REQUEST);
             }
+        });
+    }
+    toggleVisibility(aulaId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.aulasService.toggleAulaVisibility(aulaId);
         });
     }
 };
@@ -162,13 +155,20 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AulasController.prototype, "getVariableNames", null);
 __decorate([
-    (0, common_2.Patch)(':id'),
+    (0, common_1.Patch)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, update_aula_dto_1.UpdateAulaDto]),
     __metadata("design:returntype", Promise)
 ], AulasController.prototype, "updateAula", null);
+__decorate([
+    (0, common_1.Patch)(':aulaId/toggleVisibility'),
+    __param(0, (0, common_1.Param)('aulaId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AulasController.prototype, "toggleVisibility", null);
 exports.AulasController = AulasController = __decorate([
     (0, common_1.Controller)('aulas'),
     __metadata("design:paramtypes", [aula_service_1.AulasService])

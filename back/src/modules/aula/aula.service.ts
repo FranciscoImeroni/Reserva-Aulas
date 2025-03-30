@@ -157,4 +157,16 @@ export class AulasService {
     return names.length > 0 ? names : ['Unknown Variables'];
   }
   
+
+
+
+async toggleAulaVisibility(aulaId: string): Promise<Aula> {
+  const aula = await this.aulaRepository.findOneBy({ id: aulaId });
+  if (!aula) {
+    throw new NotFoundException(`Aula with ID ${aulaId} not found`);
+  }
+
+  aula.visible = !aula.visible; // Toggle visibility
+  return await this.aulaRepository.save(aula);
+}
 }
